@@ -40,60 +40,27 @@ export function CreateProjectForm() {
     setIsSubmitting(true);
 
     try {
-      // Create the project
-      const { data: project, error: projectError } = await supabase
-        .from("projects")
-        .insert({
-          name,
-          description: description || null,
-          created_by: user.id,
-        })
-        .select()
-        .single();
+      console.log("Creating project with user ID:", user.id);
+      
+      // Create the project using the create_new_project function
+      const { data, error } = await supabase.rpc('create_new_project', {
+        project_name: name,
+        project_description: description || null
+      });
 
-      if (projectError) throw projectError;
+      if (error) {
+        console.error("Error details:", error);
+        throw error;
+      }
 
-      // Set up default statuses for the project
-      if (project) {
-        const defaultStatuses = [
-          { name: "New", display_order: 1, project_id: project.id },
-          { name: "In progress", display_order: 2, project_id: project.id },
-          { name: "Review", display_order: 3, project_id: project.id },
-          { name: "Done", display_order: 4, project_id: project.id },
-        ];
+      toast({
+        title: "Project created successfully",
+      });
 
-        const { error: statusError } = await supabase
-          .from("statuses")
-          .insert(defaultStatuses);
-
-        if (statusError) throw statusError;
-
-        // Add the creator as a project member with 'owner' role
-        const { error: memberError } = await supabase
-          .from("project_members")
-          .insert({
-            project_id: project.id,
-            user_id: user.id,
-            role: "owner",
-          });
-
-        if (memberError) throw memberError;
-
-        // Initialize project progress at 0%
-        const { error: progressError } = await supabase
-          .from("project_progress")
-          .insert({
-            project_id: project.id,
-            percentage: 0,
-          });
-
-        if (progressError) throw progressError;
-
-        toast({
-          title: "Project created successfully",
-        });
-
-        navigate(`/projects/${project.id}`);
+      if (data) {
+        navigate(`/projects/${data}`);
+      } else {
+        navigate('/projects');
       }
     } catch (error) {
       console.error("Error creating project:", error);
