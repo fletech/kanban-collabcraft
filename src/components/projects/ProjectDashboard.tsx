@@ -60,7 +60,21 @@ export function ProjectDashboard() {
           .eq("project_id", projectId);
 
         if (membersError) throw membersError;
-        if (membersData) setMembers(membersData as Member[]);
+        // Fix the type issue by casting the data properly
+        if (membersData) {
+          // Ensure proper type casting for the members data
+          const typedMembersData = membersData.map(member => ({
+            id: member.id,
+            user_id: member.user_id,
+            user: {
+              full_name: member.user?.full_name || null,
+              avatar_url: member.user?.avatar_url || null,
+              email: member.user?.email || ''
+            }
+          })) as Member[];
+          
+          setMembers(typedMembersData);
+        }
 
         // Fetch project progress
         const { data: progressData, error: progressError } = await supabase
