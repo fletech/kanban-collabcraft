@@ -42,7 +42,38 @@ export function CreateProjectForm() {
     try {
       console.log("Creating project with user ID:", user.id);
       
-      // Create the project using the create_new_project function
+      // First, check if the user exists in the users table
+      const { data: existingUser, error: userCheckError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+        
+      if (userCheckError && userCheckError.code !== 'PGRST116') {
+        // PGRST116 means no rows returned, which we expect if the user doesn't exist yet
+        console.error("Error checking user:", userCheckError);
+        throw userCheckError;
+      }
+      
+      // If user doesn't exist in users table, create them
+      if (!existingUser) {
+        console.log("User doesn't exist in users table, creating...");
+        const { error: createUserError } = await supabase
+          .from('users')
+          .insert({
+            id: user.id,
+            email: user.email || '',
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+            avatar_url: user.user_metadata?.avatar_url || null
+          });
+          
+        if (createUserError) {
+          console.error("Error creating user:", createUserError);
+          throw createUserError;
+        }
+      }
+      
+      // Now create the project using the create_new_project function
       const { data, error } = await supabase.rpc('create_new_project', {
         project_name: name,
         project_description: description || null
