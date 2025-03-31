@@ -1,10 +1,23 @@
 
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { useEffect } from "react";
 
 export default function Login() {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get the intended destination from location state, or default to projects
+  const from = location.state?.from?.pathname || "/projects";
+  
+  useEffect(() => {
+    // If user becomes authenticated, redirect them
+    if (user && !loading) {
+      navigate(from, { replace: true });
+    }
+  }, [user, loading, navigate, from]);
 
   if (loading) {
     return (
@@ -14,8 +27,9 @@ export default function Login() {
     );
   }
 
+  // This check is needed for initial render, the useEffect handles subsequent auth changes
   if (user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={from} replace />;
   }
 
   return (

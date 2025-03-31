@@ -4,6 +4,7 @@ import { AppHeader } from "./AppHeader";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useLocation } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect } from "react";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -13,11 +14,17 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { user, loading } = useAuth();
   const location = useLocation();
 
+  useEffect(() => {
+    // Log authentication state for debugging
+    console.log("AppLayout auth state:", { user: user?.email, loading, path: location.pathname });
+  }, [user, loading, location]);
+
   if (loading) {
     return <LoadingScreen />;
   }
 
   if (!user) {
+    // Pass the current location to redirect back after login
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
