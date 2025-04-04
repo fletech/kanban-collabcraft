@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -115,27 +114,26 @@ export function KanbanBoard({ projectId, onProgressUpdate }: KanbanBoardProps) {
       (task) => task.status_id === doneStatus.id
     ).length;
     const totalTasks = tasks.length;
-    const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    const progressPercentage =
+      totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
     // Update project progress in database
     updateProjectProgress(progressPercentage);
-    
+
     // Update UI
     onProgressUpdate(progressPercentage);
   };
 
   const updateProjectProgress = async (percentage: number) => {
     try {
-      await supabase
-        .from("project_progress")
-        .upsert(
-          {
-            project_id: projectId,
-            percentage,
-            calculated_at: new Date().toISOString(),
-          },
-          { onConflict: "project_id" }
-        );
+      await supabase.from("project_progress").upsert(
+        {
+          project_id: projectId,
+          percentage,
+          calculated_at: new Date().toISOString(),
+        },
+        { onConflict: "project_id" }
+      );
     } catch (error) {
       console.error("Error updating project progress:", error);
     }
@@ -155,20 +153,20 @@ export function KanbanBoard({ projectId, onProgressUpdate }: KanbanBoardProps) {
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
-    
+
     if (!over) return;
-    
+
     const activeId = active.id as string;
     const overId = over.id as string;
-    
+
     if (active.data.current?.type !== "Task") return;
-    
+
     // Find the status ID of the over container
     const overData = over.data.current;
     const overStatusId = overData?.status?.id || overData?.task?.status_id;
-    
+
     if (!overStatusId) return;
-    
+
     // Check if we need to update the task
     const activeTask = tasks.find((task) => task.id === activeId);
     if (activeTask && activeTask.status_id !== overStatusId) {
@@ -183,12 +181,12 @@ export function KanbanBoard({ projectId, onProgressUpdate }: KanbanBoardProps) {
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    
+
     if (!over) return;
-    
+
     const activeId = active.id as string;
     const overId = over.id as string;
-    
+
     if (active.data.current?.type === "Task" && activeTask) {
       try {
         // Update task status in the database
@@ -196,24 +194,23 @@ export function KanbanBoard({ projectId, onProgressUpdate }: KanbanBoardProps) {
           .from("tasks")
           .update({ status_id: activeTask.status_id })
           .eq("id", activeId);
-          
+
         if (error) throw error;
-        
+
         // Recalculate progress
         calculateProgress(statuses, tasks);
-        
       } catch (error) {
         console.error("Error updating task status:", error);
         toast({
           title: "Failed to update task status",
           variant: "destructive",
         });
-        
+
         // Revert changes if the update failed
         fetchTasks();
       }
     }
-    
+
     setActiveTask(null);
     setActiveColumn(null);
   };
@@ -224,7 +221,7 @@ export function KanbanBoard({ projectId, onProgressUpdate }: KanbanBoardProps) {
         .from("tasks")
         .select("*")
         .eq("project_id", projectId);
-        
+
       if (error) throw error;
       if (data) {
         setTasks(data);
@@ -257,13 +254,15 @@ export function KanbanBoard({ projectId, onProgressUpdate }: KanbanBoardProps) {
           .eq("id", editingTask.id)
           .select()
           .single();
-          
+
         if (error) throw error;
-        
+
         setTasks((prev) =>
-          prev.map((task) => (task.id === editingTask.id ? { ...task, ...data } : task))
+          prev.map((task) =>
+            task.id === editingTask.id ? { ...task, ...data } : task
+          )
         );
-        
+
         toast({
           title: "Task updated successfully",
         });
@@ -275,25 +274,24 @@ export function KanbanBoard({ projectId, onProgressUpdate }: KanbanBoardProps) {
           status_id: editingStatusId!,
           created_by: user?.id,
         };
-        
+
         const { data, error } = await supabase
           .from("tasks")
           .insert(newTask)
           .select()
           .single();
-          
+
         if (error) throw error;
-        
+
         setTasks((prev) => [...prev, data as Task]);
-        
+
         toast({
           title: "Task created successfully",
         });
       }
-      
+
       // Recalculate progress
       fetchTasks();
-      
     } catch (error) {
       console.error("Error saving task:", error);
       toast({
@@ -309,22 +307,18 @@ export function KanbanBoard({ projectId, onProgressUpdate }: KanbanBoardProps) {
 
   const handleDeleteTask = async (taskId: string) => {
     try {
-      const { error } = await supabase
-        .from("tasks")
-        .delete()
-        .eq("id", taskId);
-        
+      const { error } = await supabase.from("tasks").delete().eq("id", taskId);
+
       if (error) throw error;
-      
+
       setTasks((prev) => prev.filter((task) => task.id !== taskId));
-      
+
       toast({
         title: "Task deleted successfully",
       });
-      
+
       // Recalculate progress
       fetchTasks();
-      
     } catch (error) {
       console.error("Error deleting task:", error);
       toast({
@@ -373,6 +367,7 @@ export function KanbanBoard({ projectId, onProgressUpdate }: KanbanBoardProps) {
         statuses={statuses}
         onSave={handleSaveTask}
         onDelete={editingTask ? handleDeleteTask : undefined}
+        initialStatusId={editingStatusId}
       />
     </div>
   );

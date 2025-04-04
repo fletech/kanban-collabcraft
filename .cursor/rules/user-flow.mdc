@@ -1,0 +1,106 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# ***Primary user-flow:*** 
+
+#  **Basic User Flow for MVP**
+
+## **Start and Access**
+
+1. **Accessing the platform**: The user enters the application and sees the start screen.  
+2. **Login**: The user identifies themselves using their Gmail account, seeing their profile (for example: Alexandra C.) in the top right corner once authenticated. If not an existing user, registration upon clicking in SIGN UP button (this option is provided by Gmail integration)
+
+## **Main Navigation**
+
+3. **Project selection**: In the left sidebar, the user can select between different projects, that the user has created, in case there is none, show a button to create a new project.
+
+## **Project Dashboard**
+
+4. **Board overview**:   
+   As Dashboard, will be a brief of projects (cards) in case there is no project created yet, a button to create one. Once there are one or more projects the user can pick one to see then a board organized into four status columns:  
+   * New  
+   * In progress  
+   * Review  
+   * Done  
+5. **Progress tracking**: At the top, the user visualizes a progress bar indicating that the project is completed to the corresponding percentage of their completed tasks over the total. If there are none, it shows nothing.
+
+## **Task Management**
+
+6. **Task visualization**: The user can see task cards distributed in the columns according to their status, each with:  
+   * Task title  
+   * Brief description  
+   * Priority label (Must, Medium, Tiny, Huge) \-\> enum  
+7. **Task creation**: The user can create new tasks by clicking on the "+ Add Task" buttons available in each column.  
+   This task can be dragged among columns and therefore updating their status according to the column it’s been dragged to.  
+8. **Board management**: The user can:  
+   * Filter the view using the tabs: Description, Board, Notes, and Test  
+   * Add a new board with the "+ Add board" button  
+   * Update the view with the circular refresh button
+
+## **Task Interaction**
+
+9. **Task details**: The user can view detailed information for each task, examples:  
+   * For "AST Builder": "Create an Abstract Syntax Tree using tokens and TreeSitter"  
+   * For "JavaScript lexer": "Research JavaScript grammar and provide an overview on what to..."  
+10. **Task categorization**: The user identifies the priority of each task through color labels that come from the "tasks\_priority" enum in the DB:  
+    * Must (red)  
+    * Medium (blue)  
+    * Tiny (light green)  
+    * Huge (orange)
+
+## **Collaboration**
+
+11. **Teamwork**: The user can see avatars of other collaborators at the top of the board, showing who is working on the project.
+
+This flow focuses exclusively on the functionalities visible in the screenshot, providing an experience centered on task and project management through a Kanban board system with clearly defined states.
+
+***Secondary user-flow-*** not implemented at first, but the DB supports it.  
+
+**Project Member Management**
+
+## **Accessing Member Management**
+
+1. **Member panel access**: While viewing a project dashboard, the user can click on a "Members" or "Team" icon in the sidebar  
+2. **Member overview**: Upon accessing the member section, the user sees a list of current project members with their:  
+   * Profile picture  
+   * Full name  
+   * Email  
+   * Role (owner, admin, member, viewer)  
+   * Join date
+
+## **Adding New Members**
+
+3. **Invitation interface**: Users with owner or admin roles see an "+ Invite Member" button prominently displayed in the members section.  
+4. **Member invitation flow**:  
+   * Clicking the invite button opens a modal dialog  
+   * The modal contains a form with:  
+     * Email input field  
+     * Role selection dropdown (admin, member, viewer)  
+     * Optional personal message field  
+     * "Send Invitation" and "Cancel" buttons  
+5. **Invitation confirmation**: After submitting, the user sees a success confirmation and the invited email appears in a "Pending Invitations" section with status "Invited".
+
+## **Managing Existing Members**
+
+6. **Role management**: Owners and admins can change roles of existing members by:  
+   * Clicking on a three-dot menu next to each member  
+   * Selecting "Change Role" from the dropdown  
+   * Choosing a new role from the role selector  
+7. **Member removal**: Owners and admins can remove members by:  
+   * Clicking on the three-dot menu next to a member  
+   * Selecting "Remove from Project"  
+   * Confirming the action in a confirmation dialog
+
+## **Visual Design Elements**
+
+9. **Member cards**: Each member is displayed in a card with:  
+   * Left-aligned avatar  
+   * Name and email details in the center  
+   * Role indicator using subtle color coding (Owner: gold, Admin: blue, Member: green, Viewer: gray)  
+   * Action menu on the right  
+10. **Permission indicators**: Visual cues (such as padlock icons or tooltips) indicate which actions are restricted based on the user's role in the project.
+
+
+

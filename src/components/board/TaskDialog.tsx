@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +27,7 @@ interface TaskDialogProps {
   statuses: { id: string; name: string }[];
   onSave: (task: Partial<Task>) => void;
   onDelete?: (taskId: string) => void;
+  initialStatusId?: string;
 }
 
 export default function TaskDialog({
@@ -37,10 +37,13 @@ export default function TaskDialog({
   statuses,
   onSave,
   onDelete,
+  initialStatusId,
 }: TaskDialogProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<"Must" | "Medium" | "Tiny" | "Huge">("Medium");
+  const [priority, setPriority] = useState<"Must" | "Medium" | "Tiny" | "Huge">(
+    "Medium"
+  );
   const [statusId, setStatusId] = useState("");
 
   // Reset form when dialog opens/closes or task changes
@@ -54,15 +57,16 @@ export default function TaskDialog({
       setTitle("");
       setDescription("");
       setPriority("Medium");
+      setStatusId(initialStatusId || "");
       // Status ID is set by the column that opened the dialog
     }
   }, [task, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title.trim()) return;
-    
+
     onSave({
       title,
       description: description || null,
@@ -105,12 +109,14 @@ export default function TaskDialog({
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 mb-8">
               <div className="grid gap-2">
                 <Label htmlFor="priority">Priority</Label>
                 <Select
                   value={priority}
-                  onValueChange={(value) => setPriority(value as "Must" | "Medium" | "Tiny" | "Huge")}
+                  onValueChange={(value) =>
+                    setPriority(value as "Must" | "Medium" | "Tiny" | "Huge")
+                  }
                 >
                   <SelectTrigger id="priority">
                     <SelectValue placeholder="Select priority" />
@@ -123,13 +129,17 @@ export default function TaskDialog({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid gap-2">
+              <div className="grid gap-2 relative">
                 <Label htmlFor="status">Status</Label>
                 <Select
                   value={statusId}
                   onValueChange={setStatusId}
+                  disabled={!task} // Deshabilitar si es una nueva tarea
                 >
-                  <SelectTrigger id="status">
+                  <SelectTrigger
+                    id="status"
+                    className={!task ? "opacity-50 cursor-not-allowed" : ""}
+                  >
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -140,6 +150,11 @@ export default function TaskDialog({
                     ))}
                   </SelectContent>
                 </Select>
+                {!task && (
+                  <p className="absolute text-xs text-muted-foreground -bottom-10 left-1">
+                    Status is determined by the column
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -156,9 +171,9 @@ export default function TaskDialog({
               </Button>
             )}
             <div className="flex gap-2">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
               >
                 Cancel

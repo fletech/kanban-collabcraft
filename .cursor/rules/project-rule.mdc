@@ -1,0 +1,260 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# **Product Requirements Document (PRD)**
+
+## **TaskFlow \- Task Management System**
+
+### **1\. General Description**
+
+TaskFlow is a web-based task management application with Kanban boards that allows users to organize their projects visually and intuitively. The platform enables users to create projects, manage tasks through a column system (New, In Progress, Review, Done), assign priorities, and collaborate with other team members.
+
+The platform is primarily designed for development teams and professionals who need a simple yet effective tool to organize their work and visualize project progress.
+
+Key objectives include providing an intuitive user interface, ensuring fast and reliable performance, delivering a smooth task management experience, and facilitating basic collaboration among team members.
+
+### **2\. Scope vs. Out of Scope**
+
+#### **In Scope:**
+
+* User authentication with Gmail via Supabase  
+* User dashboard with ability to create and select different projects  
+* Kanban board with four status columns (New, In Progress, Review, Done)  
+* Functionality to create, move, and edit tasks between columns  
+* Priority tagging system for tasks (Must, Medium, Tiny, Huge)  
+* Progress bar showing the percentage of completed tasks  
+* Visualization of collaborator avatars on the project  
+* Sidebar navigation for project access  
+* Responsive design for mobile and desktop devices
+
+#### **Out of Scope:**
+
+* Payment processing or premium versions  
+* Advanced filters beyond basic tabs (Description, Board, Notes, Test)  
+* Advanced team member management (although the database supports it)  
+* Real-time notifications  
+* Calendar or timeline views  
+* Integration with external services like GitHub, Slack, etc.  
+* Advanced reports and analytics  
+* Native iOS/Android applications (will prioritize responsive web design)
+
+### **3\. User Flow**
+
+#### **Primary User Flow**
+
+1. **Start and Access**:
+
+   * User enters the application and sees the start screen  
+   * Logs in using their Gmail account (implemented with Supabase)  
+   * After authentication, sees their profile in the top right corner  
+2. **Main Navigation**:
+
+   * In the left sidebar, the user can select between different projects they have created  
+   * If none exist, a button to create a new project is shown  
+3. **Project Dashboard**:
+
+   * As Dashboard, they'll see a brief of projects (cards) if there are any, or a button to create one if none exist  
+   * When selecting a project, the user sees a board organized into four status columns  
+   * At the top, a progress bar indicates the project completion percentage based on completed tasks  
+4. **Task Management**:
+
+   * User can see task cards distributed in columns according to their status  
+   * Each card shows: task title, brief description, and priority label  
+   * They can create new tasks by clicking on the "+ Add Task" buttons in each column  
+   * Tasks can be dragged between columns to update their status  
+   * The view can be filtered using tabs: Description, Board, Notes, and Test  
+5. **Task Interaction**:
+
+   * Users can view detailed information for each task  
+   * They can identify task priority through color-coded labels (Must: red, Medium: blue, Tiny: light green, Huge: orange)  
+6. **Collaboration**:
+
+   * Users can see avatars of other collaborators at the top of the board
+
+### **4\. Key Features**
+
+#### **User Authentication:**
+
+* Gmail authentication via Supabase integration  
+* Simplified registration process leveraging Google accounts
+
+#### **Project Management:**
+
+* Project creation, selection, and visualization  
+* Sidebar for navigation between projects
+
+#### **Kanban Board:**
+
+* Board view with four statuses: New, In Progress, Review, Done  
+* Progress indicator calculating the percentage of completed tasks  
+* Support for tabs that allow switching between different views (Description, Board, Notes, Test)
+
+#### **Task Management:**
+
+* Task creation with title, description, and priority  
+* Drag-and-drop functionality for moving tasks between columns  
+* Priority labels with color coding  
+* Task counter per column
+
+#### **Basic Collaboration:**
+
+* Team member visualization through avatars  
+* Team member presence indicator
+
+#### **User Interface:**
+
+* Clean and minimalist design using Tailwind CSS  
+* Intuitive navigation with sidebar  
+* Responsive interface that works on mobile and desktop devices  
+* Integrated accessibility following modern standards
+
+### **5\. Technology Stack**
+
+#### **Frontend:**
+
+* React 19 for building the user interface  
+* JavaScript as the primary language  
+* Tailwind CSS for styles and responsive design  
+* Context API for global state management  
+* React DnD or similar for drag-and-drop functionality
+
+#### **Backend and Storage:**
+
+* Supabase for authentication, database, and storage needs  
+* Gmail authentication via Supabase Auth
+
+#### **Infrastructure:**
+
+* Vercel deployment for the frontend  
+* PostgreSQL database managed by Supabase
+
+### **6\. Non-Functional Requirements**
+
+#### **Performance:**
+
+* Fast loading times (\<2 seconds for main components)  
+* Smooth drag-and-drop experience for task management  
+* Optimization for low-speed internet connections
+
+#### **Security:**
+
+* Secure authentication through Supabase and Gmail  
+* Data protection and privacy for projects and tasks  
+* Role-based access controls for collaborators
+
+#### **Usability:**
+
+* Responsive design adapted for mobile devices, tablets, and desktops  
+* Accessible interfaces complying with WCAG 2.1 standards  
+* Adequate contrast and screen reader support
+
+### **7\. Data Model**
+
+Based on the SQL definition provided, our system will use the following database structure:
+
+#### **Users Table**
+
+* UUID as primary key  
+* Email (required, unique)  
+* Full name  
+* Avatar URL  
+* Role (default: 'member')  
+* Authentication provider details  
+* Created at timestamp  
+* Last login timestamp
+
+#### **Projects Table**
+
+* UUID as primary key  
+* Name (required)  
+* Icon  
+* Description  
+* Created and updated timestamps  
+* Created by (reference to users table)
+
+#### **Project Members Table**
+
+* UUID as primary key  
+* Project ID (reference to projects table)  
+* User ID (reference to users table)  
+* Role (enum: owner, admin, member, viewer)  
+* Joined at timestamp
+
+#### **Statuses Table**
+
+* UUID as primary key  
+* Name  
+* Display order  
+* Project ID (reference to projects table)
+
+#### **Tasks Table**
+
+* UUID as primary key  
+* Title (required)  
+* Description  
+* Priority (enum: Must, Medium, Tiny, Huge)  
+* Status ID (reference to statuses table)  
+* Project ID (reference to projects table)  
+* Created by and assigned to (references to users table)  
+* Created and updated timestamps
+
+#### **Project Progress Table**
+
+* UUID as primary key  
+* Project ID (reference to projects table)  
+* Percentage (0-100)  
+* Calculated at timestamp
+
+### **8\. Implementation Plan**
+
+#### **Phase 1: Setup and Authentication**
+
+* Configure React project and basic structure  
+* Integrate Tailwind CSS  
+* Implement authentication with Supabase and Gmail  
+* Create database structure in Supabase
+
+#### **Phase 2: Project Management and Base UI**
+
+* Develop sidebar navigation  
+* Implement project creation and selection  
+* Create main layout and base components
+
+#### **Phase 3: Kanban Board and Task Management**
+
+* Develop board view with columns  
+* Implement task creation functionality  
+* Add support for drag-and-drop between columns  
+* Integrate priority system and labels
+
+#### **Phase 4: Polishing and Optimization**
+
+* Implement progress indicator  
+* Add collaborator visualization  
+* Optimize for mobile devices  
+* Conduct performance and usability testing  
+* Deploy to Vercel for production
+
+### **9\. Additional Considerations**
+
+#### **Scalability**
+
+The architecture should allow for future addition of functionalities such as advanced member management, notifications, and additional views without requiring significant changes to the base structure.
+
+#### **Accessibility**
+
+The application should follow best accessibility practices, including:
+
+* Appropriate ARIA labels  
+* Keyboard navigation  
+* Adequate color contrast  
+* Screen reader support
+
+#### **Mobile Support**
+
+While native apps won't be developed, the web interface should be fully functional on mobile devices, adapting the Kanban board visualization for smaller screens.
+
+
+

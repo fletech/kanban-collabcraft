@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { FileText, Plus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 

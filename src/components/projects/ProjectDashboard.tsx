@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
@@ -27,6 +26,7 @@ export function ProjectDashboard() {
   const [members, setMembers] = useState<Member[]>([]);
   const [progress, setProgress] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [description, setDescription] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -44,11 +44,13 @@ export function ProjectDashboard() {
 
         if (projectError) throw projectError;
         if (project) setProjectName(project.name);
+        if (project) setDescription(project.description || "");
 
         // Fetch project members
         const { data: membersData, error: membersError } = await supabase
           .from("project_members")
-          .select(`
+          .select(
+            `
             id,
             user_id,
             user:users (
@@ -56,7 +58,8 @@ export function ProjectDashboard() {
               avatar_url,
               email
             )
-          `)
+          `
+          )
           .eq("project_id", projectId);
 
         if (membersError) throw membersError;
@@ -71,9 +74,9 @@ export function ProjectDashboard() {
           .eq("project_id", projectId)
           .single();
 
-        if (progressError && progressError.code !== "PGRST116") throw progressError;
+        if (progressError && progressError.code !== "PGRST116")
+          throw progressError;
         if (progressData) setProgress(progressData.percentage);
-
       } catch (error) {
         console.error("Error fetching project details:", error);
         toast({
@@ -123,7 +126,9 @@ export function ProjectDashboard() {
             <div className="w-64 mr-4">
               <Progress value={progress} className="h-2" />
             </div>
-            <span className="text-sm text-muted-foreground">{progress}% complete</span>
+            <span className="text-sm text-muted-foreground">
+              {progress}% complete
+            </span>
           </div>
         </div>
         <div className="flex -space-x-2">
@@ -131,7 +136,9 @@ export function ProjectDashboard() {
             <Avatar key={member.id} className="border-2 border-background">
               <AvatarImage src={member.user?.avatar_url || undefined} />
               <AvatarFallback>
-                {member.user?.full_name?.charAt(0) || member.user?.email?.charAt(0) || "U"}
+                {member.user?.full_name?.charAt(0) ||
+                  member.user?.email?.charAt(0) ||
+                  "U"}
               </AvatarFallback>
             </Avatar>
           ))}
@@ -149,12 +156,13 @@ export function ProjectDashboard() {
           <TabsTrigger value="test">Test</TabsTrigger>
         </TabsList>
         <TabsContent value="description" className="mt-4">
-          <div className="text-muted-foreground">
-            Project description and details will appear here.
-          </div>
+          <div className="text-muted-foreground">{description}</div>
         </TabsContent>
         <TabsContent value="board" className="mt-4">
-          <KanbanBoard projectId={projectId || ""} onProgressUpdate={setProgress} />
+          <KanbanBoard
+            projectId={projectId || ""}
+            onProgressUpdate={setProgress}
+          />
         </TabsContent>
         <TabsContent value="notes" className="mt-4">
           <div className="text-muted-foreground">
