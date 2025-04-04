@@ -124,6 +124,7 @@ Key objectives include providing an intuitive user interface, ensuring fast and 
 
 * Supabase for authentication, database, and storage needs  
 * Gmail authentication via Supabase Auth
+* You will be always connected to supabase via MCP server
 
 #### **Infrastructure:**
 
@@ -242,6 +243,8 @@ Based on the SQL definition provided, our system will use the following database
 #### **Scalability**
 
 The architecture should allow for future addition of functionalities such as advanced member management, notifications, and additional views without requiring significant changes to the base structure.
+
+### **Always focus on small components, by separating respoinsabilities and which components handles what!
 
 #### **Accessibility**
 

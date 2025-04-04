@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -14,29 +12,34 @@ import {
 } from "lucide-react";
 import { useProjects } from "@/contexts/ProjectContext";
 import { ProjectDialog } from "@/components/projects/ProjectDialog";
+import { useNavigation } from "@/contexts/NavigationContext";
+import { useNavigate } from "react-router-dom";
+import { useMember } from "@/contexts/MemberContext";
 
 export function AppSidebar() {
   const {
     projects,
-    activeProject,
     editingProject,
-    setActiveProject,
     setEditingProject,
     isProjectDialogOpen,
     setIsProjectDialogOpen,
   } = useProjects();
+  const {
+    currentProjectId,
+    navigateToProject,
+    navigateToDashboard,
+    navigateToAllProjects,
+    navigateToNewProject,
+  } = useNavigation();
   const navigate = useNavigate();
+  const { refreshMembers } = useMember();
 
   const handleProjectClick = (projectId: string) => {
-    setActiveProject(projectId);
-    navigate(`/projects/${projectId}`);
-  };
-
-  const handleEditProject = (
-    project: Database["public"]["Tables"]["projects"]["Row"]
-  ) => {
-    setEditingProject(project);
-    setIsProjectDialogOpen(true);
+    navigateToProject(projectId);
+    // Añadir un pequeño timeout para asegurar que la navegación ha terminado
+    setTimeout(() => {
+      refreshMembers();
+    }, 100);
   };
 
   return (
@@ -59,7 +62,7 @@ export function AppSidebar() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate("/projects")}
+                onClick={navigateToDashboard}
                 className="w-full justify-start"
               >
                 <LayoutDashboard size={16} className="mr-2" />
@@ -68,7 +71,7 @@ export function AppSidebar() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate("/projects")}
+                onClick={navigateToAllProjects}
                 className="w-full justify-start"
               >
                 <FolderOpen size={16} className="mr-2" />
@@ -84,7 +87,7 @@ export function AppSidebar() {
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
-                onClick={() => navigate("/projects/new")}
+                onClick={navigateToNewProject}
               >
                 <Plus size={16} />
               </Button>
@@ -101,24 +104,13 @@ export function AppSidebar() {
                     onClick={() => handleProjectClick(project.id)}
                     className={cn(
                       "w-full justify-start",
-                      activeProject === project.id &&
+                      currentProjectId === project.id &&
                         "bg-accent text-accent-foreground font-bold text-md"
                     )}
                   >
                     <FileText size={16} className="mr-2 flex-shrink-0" />
                     <span className="truncate">{project.name}</span>
                   </Button>
-                  {/* <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 opacity-0 group-hover:opacity-100 group-hover:bg-accent"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditProject(project);
-                    }}
-                  >
-                    <MoreVertical size={16} />
-                  </Button> */}
                 </div>
               ))}
               {projects.length === 0 && (
@@ -130,7 +122,7 @@ export function AppSidebar() {
                     variant="outline"
                     size="sm"
                     className="mt-2"
-                    onClick={() => navigate("/projects/new")}
+                    onClick={navigateToNewProject}
                   >
                     <Plus size={16} className="mr-2" />
                     Create Project
@@ -148,7 +140,7 @@ export function AppSidebar() {
         project={editingProject}
         onSuccess={() => {
           if (editingProject) {
-            navigate("/projects");
+            navigateToAllProjects();
           }
         }}
       />
