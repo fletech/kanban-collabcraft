@@ -1,4 +1,3 @@
-
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Task } from "./KanbanBoard";
@@ -53,7 +52,7 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
       style={style}
       {...attributes}
       {...listeners}
-      className="bg-white p-3 rounded-md border shadow-sm hover:shadow cursor-pointer"
+      className="bg-white p-3 rounded-md border shadow-sm hover:shadow cursor-pointer min-h-[10vh] h-auto"
       onClick={onClick}
     >
       <h4 className="font-medium text-sm mb-2">{task.title}</h4>

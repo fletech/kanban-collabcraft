@@ -1,17 +1,30 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Database, supabase } from "@/lib/supabase";
-import { Plus, LayoutDashboard, FileText } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  Plus,
+  LayoutDashboard,
+  FileText,
+  MoreVertical,
+  FolderOpen,
+} from "lucide-react";
 import { useProjects } from "@/contexts/ProjectContext";
-type Project = Database["public"]["Tables"]["projects"]["Row"];
+import { ProjectDialog } from "@/components/projects/ProjectDialog";
 
 export function AppSidebar() {
-  const { projects } = useProjects();
-  const [activeProject, setActiveProject] = useState<string | null>(null);
+  const {
+    projects,
+    activeProject,
+    editingProject,
+    setActiveProject,
+    setEditingProject,
+    isProjectDialogOpen,
+    setIsProjectDialogOpen,
+  } = useProjects();
   const navigate = useNavigate();
 
   const handleProjectClick = (projectId: string) => {
@@ -19,8 +32,11 @@ export function AppSidebar() {
     navigate(`/projects/${projectId}`);
   };
 
-  const handleCreateProject = () => {
-    navigate("/projects/new");
+  const handleEditProject = (
+    project: Database["public"]["Tables"]["projects"]["Row"]
+  ) => {
+    setEditingProject(project);
+    setIsProjectDialogOpen(true);
   };
 
   return (
@@ -39,33 +55,71 @@ export function AppSidebar() {
       <div className="flex-1 overflow-auto">
         <ScrollArea className="h-full">
           <div className="px-3 py-2">
+            <div className="space-y-1 mb-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/projects")}
+                className="w-full justify-start"
+              >
+                <LayoutDashboard size={16} className="mr-2" />
+                Dashboard
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/projects")}
+                className="w-full justify-start"
+              >
+                <FolderOpen size={16} className="mr-2" />
+                All Projects
+              </Button>
+            </div>
+
+            <Separator className="my-2" />
+
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-sm font-semibold">Projects</h2>
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
-                onClick={handleCreateProject}
+                onClick={() => navigate("/projects/new")}
               >
                 <Plus size={16} />
               </Button>
             </div>
             <div className="space-y-1">
               {projects.map((project) => (
-                <Button
+                <div
                   key={project.id}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleProjectClick(project.id)}
-                  className={cn(
-                    "w-full justify-start",
-                    activeProject === project.id &&
-                      "bg-accent text-accent-foreground"
-                  )}
+                  className={cn("flex items-center group ")}
                 >
-                  <FileText size={16} className="mr-2" />
-                  {project.name}
-                </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleProjectClick(project.id)}
+                    className={cn(
+                      "w-full justify-start",
+                      activeProject === project.id &&
+                        "bg-accent text-accent-foreground font-bold text-md"
+                    )}
+                  >
+                    <FileText size={16} className="mr-2 flex-shrink-0" />
+                    <span className="truncate">{project.name}</span>
+                  </Button>
+                  {/* <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 opacity-0 group-hover:opacity-100 group-hover:bg-accent"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditProject(project);
+                    }}
+                  >
+                    <MoreVertical size={16} />
+                  </Button> */}
+                </div>
               ))}
               {projects.length === 0 && (
                 <div className="px-2 py-4 text-center">
@@ -76,7 +130,7 @@ export function AppSidebar() {
                     variant="outline"
                     size="sm"
                     className="mt-2"
-                    onClick={handleCreateProject}
+                    onClick={() => navigate("/projects/new")}
                   >
                     <Plus size={16} className="mr-2" />
                     Create Project
@@ -87,6 +141,17 @@ export function AppSidebar() {
           </div>
         </ScrollArea>
       </div>
+
+      <ProjectDialog
+        open={isProjectDialogOpen}
+        onOpenChange={setIsProjectDialogOpen}
+        project={editingProject}
+        onSuccess={() => {
+          if (editingProject) {
+            navigate("/projects");
+          }
+        }}
+      />
     </div>
   );
 }

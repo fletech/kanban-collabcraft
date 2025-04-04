@@ -2,6 +2,26 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Edit2, Trash2, Settings } from "lucide-react";
+import { Button } from "../ui/button";
+import {
   DndContext,
   DragEndEvent,
   DragOverEvent,
@@ -16,6 +36,8 @@ import TaskColumn from "./TaskColumn";
 import TaskCard from "./TaskCard";
 import TaskDialog from "./TaskDialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProjects } from "@/contexts/ProjectContext";
+import { useNavigate } from "react-router-dom";
 
 type Status = {
   id: string;
@@ -37,6 +59,10 @@ type KanbanBoardProps = {
 };
 
 export function KanbanBoard({ projectId, onProgressUpdate }: KanbanBoardProps) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { setEditingProject, setIsProjectDialogOpen, deleteProject, projects } =
+    useProjects();
+  const navigate = useNavigate();
   const [statuses, setStatuses] = useState<Status[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
@@ -161,22 +187,23 @@ export function KanbanBoard({ projectId, onProgressUpdate }: KanbanBoardProps) {
 
     if (active.data.current?.type !== "Task") return;
 
-    // Find the status ID of the over container
-    const overData = over.data.current;
-    const overStatusId = overData?.status?.id || overData?.task?.status_id;
+    // Encontrar el status_id de la columna sobre la que estamos
+    let newStatusId = overId;
 
-    if (!overStatusId) return;
-
-    // Check if we need to update the task
-    const activeTask = tasks.find((task) => task.id === activeId);
-    if (activeTask && activeTask.status_id !== overStatusId) {
-      // Update task status locally
-      setTasks((prev) =>
-        prev.map((task) =>
-          task.id === activeId ? { ...task, status_id: overStatusId } : task
-        )
-      );
+    // Si estamos sobre una tarea, obtener el status_id de su columna
+    if (over.data.current?.type === "Task") {
+      const overTask = tasks.find((t) => t.id === overId);
+      if (overTask) {
+        newStatusId = overTask.status_id;
+      }
     }
+
+    // Actualizar la tarea localmente
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === activeId ? { ...task, status_id: newStatusId } : task
+      )
+    );
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -187,18 +214,32 @@ export function KanbanBoard({ projectId, onProgressUpdate }: KanbanBoardProps) {
     const activeId = active.id as string;
     const overId = over.id as string;
 
-    if (active.data.current?.type === "Task" && activeTask) {
+    if (active.data.current?.type === "Task") {
       try {
-        // Update task status in the database
+        let newStatusId = overId;
+
+        // Si soltamos sobre una tarea, usar el status de esa tarea
+        if (over.data.current?.type === "Task") {
+          const overTask = tasks.find((t) => t.id === overId);
+          if (overTask) {
+            newStatusId = overTask.status_id;
+          }
+        }
+
+        // Actualizar en la base de datos
         const { error } = await supabase
           .from("tasks")
-          .update({ status_id: activeTask.status_id })
+          .update({ status_id: newStatusId })
           .eq("id", activeId);
 
         if (error) throw error;
 
-        // Recalculate progress
+        // Recalcular progreso
         calculateProgress(statuses, tasks);
+
+        toast({
+          title: "Task status updated",
+        });
       } catch (error) {
         console.error("Error updating task status:", error);
         toast({
@@ -206,13 +247,12 @@ export function KanbanBoard({ projectId, onProgressUpdate }: KanbanBoardProps) {
           variant: "destructive",
         });
 
-        // Revert changes if the update failed
+        // Revertir cambios si hay error
         fetchTasks();
       }
     }
 
     setActiveTask(null);
-    setActiveColumn(null);
   };
 
   const fetchTasks = async () => {
@@ -331,19 +371,35 @@ export function KanbanBoard({ projectId, onProgressUpdate }: KanbanBoardProps) {
     }
   };
 
+  const handleDeleteProject = async () => {
+    try {
+      await deleteProject(projectId);
+      navigate("/projects");
+    } catch (error) {
+      // Error ya manejado en el contexto
+    }
+  };
+
   const getTasksByStatus = (statusId: string) => {
     return tasks.filter((task) => task.status_id === statusId);
   };
 
   return (
-    <div className="h-full">
+    <div className="h-full flex flex-col">
+      {/* <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-semibold">
+            {projects.find((p) => p.id === projectId)?.name}
+          </h2>
+        </div>
+      </div> */}
       <DndContext
         sensors={sensors}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
           {statuses.map((status) => (
             <TaskColumn
               key={status.id}
