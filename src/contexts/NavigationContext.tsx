@@ -1,5 +1,12 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { getProjectIdFromPath } from "@/hooks/use-projectId";
 
 type NavigationContextType = {
@@ -8,6 +15,7 @@ type NavigationContextType = {
   navigateToDashboard: () => void;
   navigateToAllProjects: () => void;
   navigateToNewProject: () => void;
+  isNavigating: boolean;
 };
 
 const NavigationContext = createContext<NavigationContextType | undefined>(
@@ -21,11 +29,14 @@ export function NavigationProvider({
 }) {
   const { projectId: paramProjectId } = useParams<{ projectId: string }>();
   const pathProjectId = getProjectIdFromPath();
+  const location = useLocation();
 
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(
     paramProjectId || pathProjectId
   );
+  const [isNavigating, setIsNavigating] = useState(false);
   const navigate = useNavigate();
+  const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Actualizar currentProjectId cuando cambia la URL
   useEffect(() => {
@@ -33,24 +44,56 @@ export function NavigationProvider({
     if (urlProjectId && urlProjectId !== currentProjectId) {
       setCurrentProjectId(urlProjectId);
     }
-  }, [paramProjectId, currentProjectId]);
 
-  const navigateToProject = (projectId: string) => {
-    navigate(`/projects/${projectId}`);
-    setCurrentProjectId(projectId);
-  };
+    // Resetear el estado de navegación cuando se completa
+    setIsNavigating(false);
 
-  const navigateToDashboard = () => {
+    // Limpiar cualquier timeout pendiente
+    if (navigationTimeoutRef.current) {
+      clearTimeout(navigationTimeoutRef.current);
+      navigationTimeoutRef.current = null;
+    }
+  }, [paramProjectId, pathProjectId, location.pathname, currentProjectId]);
+
+  const navigateToProject = useCallback(
+    (projectId: string) => {
+      if (projectId === currentProjectId && !isNavigating) {
+        return; // Ya estamos en este proyecto y no estamos navegando
+      }
+
+      // Marcar que estamos navegando - esto puede usarse en otros componentes
+      setIsNavigating(true);
+      setCurrentProjectId(projectId);
+
+      // Navegar a la ruta
+      navigate(`/projects/${projectId}`);
+    },
+    [navigate, currentProjectId, isNavigating]
+  );
+
+  const navigateToDashboard = useCallback(() => {
+    setIsNavigating(true);
     navigate("/projects");
-  };
+  }, [navigate]);
 
-  const navigateToAllProjects = () => {
+  const navigateToAllProjects = useCallback(() => {
+    setIsNavigating(true);
     navigate("/projects");
-  };
+  }, [navigate]);
 
-  const navigateToNewProject = () => {
+  const navigateToNewProject = useCallback(() => {
+    setIsNavigating(true);
     navigate("/projects/new");
-  };
+  }, [navigate]);
+
+  // Limpiar estado al desmontar
+  useEffect(() => {
+    return () => {
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <NavigationContext.Provider
@@ -60,6 +103,7 @@ export function NavigationProvider({
         navigateToDashboard,
         navigateToAllProjects,
         navigateToNewProject,
+        isNavigating,
       }}
     >
       {children}

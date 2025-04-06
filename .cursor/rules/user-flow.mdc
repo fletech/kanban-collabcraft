@@ -102,5 +102,33 @@ This flow focuses exclusively on the functionalities visible in the screenshot, 
    * Action menu on the right  
 10. **Permission indicators**: Visual cues (such as padlock icons or tooltips) indicate which actions are restricted based on the user's role in the project.
 
+## Phases:
+
+* 1. Invitation Interface:
+"+" button that already exists next to avatars
+When clicked, open an invitation modal
+
+* 2. Invitation Form:
+Field for new member email
+Role selector (owner, admin, member, viewer)
+Optional personalized message
+Cancel and send buttons
+
+* 3. Backend Process:
+Insert record in project_members table
+Optional: send invitation email
+Update member list
+
+* 4. UI Update:
+Display the new member in the list
+"Pending" indicator if user doesn't exist
+Avatar with initials if no photo available
+
+* 5. Error Handling:
+Validate email format
+Check if already a member
+Show success confirmation
+
+
 
 

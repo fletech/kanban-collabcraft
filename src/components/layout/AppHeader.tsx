@@ -1,16 +1,16 @@
-
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, User } from "lucide-react";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 export function AppHeader() {
   const { user, signOut } = useAuth();
@@ -21,12 +21,12 @@ export function AppHeader() {
   const getInitials = () => {
     if (user.user_metadata?.full_name) {
       return user.user_metadata.full_name
-        .split(' ')
+        .split(" ")
         .map((n: string) => n[0])
-        .join('')
+        .join("")
         .toUpperCase();
     }
-    return user.email?.substring(0, 2).toUpperCase() || 'U';
+    return user.email?.substring(0, 2).toUpperCase() || "U";
   };
 
   return (
@@ -34,15 +34,16 @@ export function AppHeader() {
       <div>
         {/* Left side of header - Can be used for breadcrumbs or search */}
       </div>
-      
+
       <div className="flex items-center gap-4">
+        <NotificationBell />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar>
-                <AvatarImage 
-                  src={user.user_metadata?.avatar_url} 
-                  alt={user.user_metadata?.full_name || user.email || "User"} 
+                <AvatarImage
+                  src={user.user_metadata?.avatar_url}
+                  alt={user.user_metadata?.full_name || user.email || "User"}
                 />
                 <AvatarFallback>{getInitials()}</AvatarFallback>
               </Avatar>

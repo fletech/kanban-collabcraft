@@ -1,8 +1,8 @@
+import { createClient } from "@supabase/supabase-js";
 
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = 'https://bewgwsfjdmdqsxezralk.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJld2d3c2ZqZG1kcXN4ZXpyYWxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM0MzIyNTMsImV4cCI6MjA1OTAwODI1M30.MzWftUGBSF_9XNT-xqp_gN24jnpdN7_B3r8nhXv6z4U';
+const supabaseUrl = "https://bewgwsfjdmdqsxezralk.supabase.co";
+const supabaseAnonKey =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJld2d3c2ZqZG1kcXN4ZXpyYWxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM0MzIyNTMsImV4cCI6MjA1OTAwODI1M30.MzWftUGBSF_9XNT-xqp_gN24jnpdN7_B3r8nhXv6z4U";
 
 export type Json =
   | string
@@ -87,6 +87,96 @@ export interface Database {
           calculated_at?: string | null;
         };
       };
+      documents: {
+        Row: {
+          id: string;
+          name: string;
+          file_path: string;
+          file_type: string;
+          file_size: number;
+          project_id: string;
+          uploaded_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          file_path: string;
+          file_type: string;
+          file_size: number;
+          project_id: string;
+          uploaded_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          file_path?: string;
+          file_type?: string;
+          file_size?: number;
+          project_id?: string;
+          uploaded_by?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      document_analysis: {
+        Row: {
+          id: string;
+          document_id: string;
+          analysis_status: string;
+          analysis_timestamp: string;
+          ai_provider: string;
+          analysis_summary: string | null;
+          raw_ai_response: string | null;
+        };
+        Insert: {
+          id?: string;
+          document_id: string;
+          analysis_status: string;
+          analysis_timestamp?: string;
+          ai_provider: string;
+          analysis_summary?: string | null;
+          raw_ai_response?: string | null;
+        };
+        Update: {
+          id?: string;
+          document_id?: string;
+          analysis_status?: string;
+          analysis_timestamp?: string;
+          ai_provider?: string;
+          analysis_summary?: string | null;
+          raw_ai_response?: string | null;
+        };
+      };
+      task_sources: {
+        Row: {
+          id: string;
+          task_id: string;
+          source_type: string;
+          document_id: string | null;
+          source_details: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          task_id: string;
+          source_type: string;
+          document_id?: string | null;
+          source_details?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          task_id?: string;
+          source_type?: string;
+          document_id?: string | null;
+          source_details?: string | null;
+          created_at?: string;
+        };
+      };
       statuses: {
         Row: {
           id: string;
@@ -112,7 +202,7 @@ export interface Database {
           id: string;
           title: string;
           description: string | null;
-          priority: 'Must' | 'Medium' | 'Tiny' | 'Huge';
+          priority: "Must" | "Medium" | "Tiny" | "Huge";
           status_id: string;
           project_id: string;
           created_by: string | null;
@@ -124,7 +214,7 @@ export interface Database {
           id?: string;
           title: string;
           description?: string | null;
-          priority: 'Must' | 'Medium' | 'Tiny' | 'Huge';
+          priority: "Must" | "Medium" | "Tiny" | "Huge";
           status_id: string;
           project_id: string;
           created_by?: string | null;
@@ -136,7 +226,7 @@ export interface Database {
           id?: string;
           title?: string;
           description?: string | null;
-          priority?: 'Must' | 'Medium' | 'Tiny' | 'Huge';
+          priority?: "Must" | "Medium" | "Tiny" | "Huge";
           status_id?: string;
           project_id?: string;
           created_by?: string | null;

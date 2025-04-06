@@ -1,3 +1,4 @@
+// src/services/membersService.ts
 import { supabase } from "@/lib/supabase";
 
 export type Member = {
@@ -63,8 +64,56 @@ export const membersService = {
     email: string,
     role: Member["role"]
   ): Promise<void> {
-    // Implementación pendiente
-    // Esta función se completará cuando implementes la funcionalidad de invitación
+    const { data: existingUser, error: userError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", email)
+      .single();
+
+    if (userError && userError.code !== "PGRST116") {
+      console.error("Error checking existing user:", userError);
+      throw userError;
+    }
+
+    // Si el usuario existe, agregarlo directamente
+    if (existingUser) {
+      const { error: memberError } = await supabase
+        .from("project_members")
+        .insert({
+          project_id: projectId,
+          user_id: existingUser.id,
+          role: role,
+        });
+
+      if (memberError) {
+        console.error("Error adding existing user to project:", memberError);
+        throw memberError;
+      }
+
+      console.log(
+        `MembersService: Added existing user ${email} to project ${projectId}`
+      );
+      return;
+    }
+
+    // Si el usuario no existe, agregar a pendingInvitations
+    const { error: inviteError } = await supabase
+      .from("pending_invitations")
+      .insert({
+        project_id: projectId,
+        email: email,
+        role: role,
+        created_at: new Date().toISOString(),
+      });
+
+    if (inviteError) {
+      console.error("Error creating invitation:", inviteError);
+      throw inviteError;
+    }
+
+    console.log(
+      `MembersService: Created invitation for ${email} to project ${projectId}`
+    );
   },
 
   /**
@@ -82,7 +131,26 @@ export const membersService = {
    * Elimina un miembro del proyecto
    */
   async removeMember(memberId: string): Promise<void> {
-    // Implementación pendiente
-    // Esta función se completará cuando implementes la funcionalidad de eliminación
+    console.log(`MembersService: Removing member with ID: ${memberId}`);
+
+    try {
+      // En lugar de usar los métodos ORM de Supabase, vamos a usar una consulta SQL directa
+      // para evitar cualquier trigger o subconsulta que pueda estar causando problemas
+      const { error } = await supabase.rpc("remove_member_by_id", {
+        member_id: memberId,
+      });
+
+      if (error) {
+        console.error("Error removing member:", error);
+        throw error;
+      }
+
+      console.log(
+        `MembersService: Successfully removed member with ID: ${memberId}`
+      );
+    } catch (error) {
+      console.error("Error in removeMember operation:", error);
+      throw error;
+    }
   },
 };

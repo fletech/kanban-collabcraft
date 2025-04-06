@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+## Every time Ask mode gives code snippets, shouldn't avoid the whole code por every file and give just pieces of code scattered. It must contemplate the whole code for every file in order to copy and paste.

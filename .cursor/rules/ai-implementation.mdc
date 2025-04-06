@@ -1,0 +1,184 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+AI Document Integration for TaskFlow
+11. Feature Extension: AI Document Analysis
+11.1 General Description
+TaskFlow will be enhanced with AI-powered document analysis capabilities, allowing users to upload documents related to their projects, analyze them using artificial intelligence, and automatically generate tasks based on the AI's findings. This feature aims to streamline project planning by extracting actionable items directly from project documentation.
+
+11.2 Scope vs. Out of Scope
+In Scope:
+Document upload and management within projects
+AI analysis of documents to extract insights and potential tasks
+Conversion of AI suggestions into tasks on the Kanban board
+Basic tracking of document usage and AI interactions
+Support for common document formats (PDF, DOCX, TXT, MD)
+Out of Scope:
+Advanced document editing within the platform
+OCR for handwritten documents or images
+Real-time collaborative document editing
+Advanced document version control
+Document template creation
+11.3 User Flow
+The user flow is divided into two distinct stages that align with the implementation phases:
+
+Phase 1: Document Management Flow
+Document Upload and Storage:
+User navigates to their profile and accesses the "My Documents" section
+User uploads a document through drag-and-drop or file browser
+System displays upload progress and confirms successful storage
+Document appears in the user's document library with metadata
+Document Organization:
+User can create folders to organize documents
+User can view, download, rename, or delete documents
+User can search and filter their document library
+Basic document preview is available for supported file types
+Phase 2: AI Chat and Task Generation Flow
+Document-AI Interaction:
+User selects a document from their library and opens the AI chat interface
+The chat interface indicates the document is loaded as context
+User can ask questions about the document or request task suggestions
+AI responds in a conversational format within the chat interface
+Task Creation from Chat:
+AI suggests potential tasks based on document content within the chat
+User reviews suggestions directly in the chat interface
+User can click on suggestions to create tasks with pre-filled details
+System confirms task creation and provides links to view tasks
+User can continue the conversation to refine or generate more tasks
+Document-Task Relationship:
+Created tasks maintain a reference to the source document
+User can see which tasks were generated from specific documents
+Tasks include a badge or indicator showing they were AI-generated
+11.4 Key Features
+Features are organized according to the two primary implementation phases:
+
+Phase 1: Document Management Features
+Document Upload and Storage:
+Support for multiple file formats (PDF, DOCX, TXT, MD, etc.)
+Secure storage in Supabase with proper access controls
+Progress indicators for uploads
+File size and type validation
+Document Organization:
+Personal document library within user profile
+Folder creation and management
+Sorting options (by name, date, size, type)
+Document tagging capabilities
+Document Interaction:
+Basic preview for supported document types
+Download functionality
+Rename and delete options
+Document sharing with project members (optional)
+Search and Discovery:
+Full-text search within document library
+Filter by file type, upload date, and size
+Recently accessed documents view
+Favorite documents functionality
+Phase 2: AI Chat and Task Generation Features
+AI Chat Interface:
+Document-context aware conversation
+Dedicated chat UI for document interaction
+Chat history preservation
+Message threading for organized conversations
+Document Analysis:
+Text extraction and processing capabilities
+Intelligent parsing of document structure
+Key point identification
+Summary generation on request
+Task Suggestion:
+In-chat task recommendations based on document content
+Confidence indicators for suggestions
+Context preservation from document to suggestion
+Multiple suggestion formats (bullet points, conversation)
+Task Creation:
+One-click conversion from suggestions to tasks
+Pre-filled task details based on context
+Task priority and effort recommendations
+Automatic project and status assignment
+Source tracking back to originating document and conversation
+11.5 Technology Stack Extensions
+Storage:
+Supabase Storage for document files
+AI Integration:
+Vercel AI SDK for AI provider management
+Integration with models like DeepSeek for document analysis
+Document processing pipeline
+11.6 Data Model Extensions
+Based on the existing database structure, the following additions will be made:
+
+Documents Table
+UUID as primary key
+Name (required)
+File path in storage
+File type
+File size
+Project ID (reference to projects table)
+Uploaded by (reference to users table)
+Created and updated timestamps
+Document Analysis Table
+UUID as primary key
+Document ID (reference to documents table)
+Analysis status
+Analysis timestamp
+AI provider used
+Analysis summary
+Raw AI response (JSON)
+Task Sources Table
+UUID as primary key
+Task ID (reference to tasks table)
+Source type (enum: 'ai_suggestion', 'manual', 'template')
+Document ID (reference to documents table, nullable)
+Source details (JSON)
+Created timestamp
+11.7 Implementation Plan
+The implementation will be clearly divided into two distinct phases:
+
+Phase 1: Document Management UI and Storage
+This phase focuses on the core document management functionality without AI integration:
+
+Implement document upload interface with drag-and-drop capability
+Set up Supabase Storage integration for secure document storage
+Create document listing and management UI within user profile
+Develop document metadata display (type, size, upload date)
+Implement document preview capabilities for common formats
+Add document organization features (folders, tags)
+Create user profile document library view
+Implement basic search and filter functionality
+Ensure document access controls based on user permissions
+Completion of Phase 1 will deliver a fully functional document management system integrated within TaskFlow, providing value to users even before AI capabilities are added.
+
+Phase 2: AI Chat Interface and Task Generation
+This phase introduces the AI capabilities through a chat interface:
+
+Create a dedicated AI chat interface within the document view
+Set up Vercel AI SDK integration with selected providers
+Implement document-context awareness in the chat system
+Develop AI document analysis functionality
+Create task suggestion display within chat interface
+Implement one-click task creation from AI suggestions
+Add task attribute recommendations (priority, effort estimation)
+Develop document-task relationship tracking
+Create suggestion confidence indicators
+Implement user feedback mechanisms for AI suggestions
+Phase 2 completion will transform the document management system into an AI-powered productivity tool that can intelligently extract tasks from documents and help users organize their work more efficiently.
+
+11.8 Additional Considerations
+Performance
+Implement document size limitations (initial limit: 10MB per file)
+Optimize AI processing for larger documents
+Consider background processing for lengthy analysis operations
+Security
+Ensure document access respects project member permissions
+Implement virus scanning for uploaded documents
+Store AI analysis results securely
+Privacy
+Clear user consent for AI processing of documents
+Options to delete documents and related AI analysis
+Transparency about AI providers used and data handling
+11.9 Success Metrics
+Percentage of projects using document analysis features
+Average number of tasks generated from AI suggestions
+User satisfaction with AI-suggested tasks (accuracy, relevance)
+Time saved in project planning through AI-assisted task creation
+Document analysis feature adoption rate

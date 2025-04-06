@@ -13,6 +13,7 @@ import {
   Member,
   PendingInvitation,
 } from "@/services/membersService";
+import { supabase } from "@/lib/supabase";
 
 type MemberContextType = {
   members: Member[];
@@ -28,6 +29,7 @@ type MemberContextType = {
   ) => Promise<void>;
   removeMember: (memberId: string) => Promise<void>;
   setEditingMember: (member: Member | null) => void;
+  setMembers: (members: Member[]) => void;
 };
 
 const MemberContext = createContext<MemberContextType | undefined>(undefined);
@@ -39,16 +41,22 @@ export function MemberProvider({ children }: { children: React.ReactNode }) {
   const [pendingInvitations, setPendingInvitations] = useState<
     PendingInvitation[]
   >([]);
-
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const projectId = useProjectId();
   const { toast } = useToast();
 
+  // Simplificada para recibir projectId explícitamente
   const fetchProjectMembers = useCallback(
-    async (id: string) => {
+    async (projectId: string) => {
       try {
         setIsLoading(true);
-        const membersData = await membersService.fetchProjectMembers(id);
+        console.log(
+          `MemberContext: Fetching members for project: ${projectId}`
+        );
+
+        const membersData = await membersService.fetchProjectMembers(projectId);
         setMembers(membersData);
+        setCurrentProjectId(projectId);
       } catch (error) {
         console.error("Error fetching members:", error);
         toast({
@@ -63,15 +71,35 @@ export function MemberProvider({ children }: { children: React.ReactNode }) {
     [toast]
   );
 
-  // Nueva función para refrescar miembros usando el projectId actual
+  // Ahora requiere projectId explícito
   const refreshMembers = useCallback(async () => {
     if (!projectId) return;
     await fetchProjectMembers(projectId);
   }, [projectId, fetchProjectMembers]);
 
-  // Implementaciones pendientes
   const inviteMember = async (email: string, role: Member["role"]) => {
-    // Implementación pendiente
+    if (!projectId) {
+      toast({
+        title: "Error",
+        description: "No project selected",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await membersService.inviteMember(projectId, email, role);
+      // Refrescar la lista de miembros
+      await refreshMembers();
+    } catch (error) {
+      console.error("Error inviting member:", error);
+      toast({
+        title: "Error",
+        description: "Failed to invite member",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
   const updateMemberRole = async (
@@ -82,13 +110,45 @@ export function MemberProvider({ children }: { children: React.ReactNode }) {
   };
 
   const removeMember = async (memberId: string) => {
-    // Implementación pendiente
+    if (!projectId) {
+      toast({
+        title: "Error",
+        description: "No project selected",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await membersService.removeMember(memberId);
+      // Actualizar el estado local para eliminar el miembro
+      setMembers((prevMembers) =>
+        prevMembers.filter((member) => member.id !== memberId)
+      );
+      toast({
+        title: "Success",
+        description: "Member removed successfully",
+      });
+    } catch (error) {
+      console.error("Error removing member:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove member",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
   // Cargar miembros cuando cambia projectId
   useEffect(() => {
     if (projectId) {
+      console.log(`MemberContext: Project ID changed to ${projectId}`);
       fetchProjectMembers(projectId);
+    } else {
+      // Limpiar el estado cuando no hay proyecto seleccionado
+      setMembers([]);
+      setCurrentProjectId(null);
     }
   }, [projectId, fetchProjectMembers]);
 
@@ -112,6 +172,7 @@ export function MemberProvider({ children }: { children: React.ReactNode }) {
     updateMemberRole,
     removeMember,
     setEditingMember,
+    setMembers,
   };
 
   return (

@@ -9,11 +9,18 @@ import {
 import { Database, supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigation } from "./NavigationContext";
+import { useAuth } from "./AuthContext";
 
 type Project = Database["public"]["Tables"]["projects"]["Row"];
 
+// Extender Project con información del rol
+interface ProjectWithRole extends Project {
+  role?: string;
+  is_owner?: boolean;
+}
+
 // Tipos adicionales para el caché de proyectos
-interface ProjectDetails extends Project {
+interface ProjectDetails extends ProjectWithRole {
   progress?: number;
   lastFetched: number;
 }
@@ -23,7 +30,9 @@ type ProjectCache = {
 };
 
 type ProjectContextType = {
-  projects: Project[];
+  projects: ProjectWithRole[];
+  myProjects: ProjectWithRole[];
+  sharedProjects: ProjectWithRole[];
   refreshProjects: () => Promise<void>;
   editingProject: Project | null;
   setEditingProject: (project: Project | null) => void;
@@ -43,28 +52,75 @@ const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 const CACHE_EXPIRY = 5 * 60 * 1000;
 
 export function ProjectProvider({ children }: { children: React.ReactNode }) {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<ProjectWithRole[]>([]);
+  const [myProjects, setMyProjects] = useState<ProjectWithRole[]>([]);
+  const [sharedProjects, setSharedProjects] = useState<ProjectWithRole[]>([]);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
   // Usar useRef para el caché para evitar re-renders innecesarios
   const projectCacheRef = useRef<ProjectCache>({});
   const { toast } = useToast();
   const { currentProjectId } = useNavigation();
+  const { user } = useAuth();
 
   // Función para obtener proyectos
   const fetchProjects = async () => {
-    const { data } = await supabase.from("projects").select("*").order("name");
-    if (data) {
-      setProjects(data);
+    if (!user) return;
 
-      // Actualizar el caché con los proyectos recién obtenidos
-      data.forEach((project) => {
-        const existingCache = projectCacheRef.current[project.id];
-        projectCacheRef.current[project.id] = {
-          ...project,
-          progress: existingCache?.progress,
-          lastFetched: Date.now(),
-        };
+    try {
+      // Consulta para obtener todos los proyectos del usuario con su rol
+      const { data, error } = await supabase
+        .from("project_members")
+        .select(
+          `
+          project_id,
+          role,
+          projects:project_id (
+            id, 
+            name, 
+            description, 
+            created_at, 
+            created_by,
+            icon
+          )
+        `
+        )
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      if (data) {
+        // Procesamos los datos para tener la estructura correcta
+        const projectsWithRole = data.map((item) => ({
+          ...(item.projects as unknown as Project),
+          role: item.role,
+          is_owner: item.role === "owner",
+        })) as ProjectWithRole[];
+
+        // Dividimos los proyectos en propios y compartidos
+        const owned = projectsWithRole.filter((p) => p.is_owner);
+        const shared = projectsWithRole.filter((p) => !p.is_owner);
+
+        setProjects(projectsWithRole);
+        setMyProjects(owned);
+        setSharedProjects(shared);
+
+        // Actualizar el caché con los proyectos recién obtenidos
+        projectsWithRole.forEach((project) => {
+          const existingCache = projectCacheRef.current[project.id];
+          projectCacheRef.current[project.id] = {
+            ...project,
+            progress: existingCache?.progress,
+            lastFetched: Date.now(),
+          };
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load projects",
+        variant: "destructive",
       });
     }
   };
@@ -232,12 +288,14 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
     return () => {
       channel.unsubscribe();
     };
-  }, []);
+  }, [user]);
 
   return (
     <ProjectContext.Provider
       value={{
         projects,
+        myProjects,
+        sharedProjects,
         refreshProjects: fetchProjects,
         editingProject,
         setEditingProject,

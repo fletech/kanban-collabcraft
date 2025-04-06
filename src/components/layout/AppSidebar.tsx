@@ -9,16 +9,22 @@ import {
   FileText,
   MoreVertical,
   FolderOpen,
+  ChevronDown,
+  ChevronRight,
+  Users,
 } from "lucide-react";
 import { useProjects } from "@/contexts/ProjectContext";
 import { ProjectDialog } from "@/components/projects/ProjectDialog";
 import { useNavigation } from "@/contexts/NavigationContext";
 import { useNavigate } from "react-router-dom";
 import { useMember } from "@/contexts/MemberContext";
+import { useState } from "react";
 
 export function AppSidebar() {
   const {
     projects,
+    myProjects,
+    sharedProjects,
     editingProject,
     setEditingProject,
     isProjectDialogOpen,
@@ -32,14 +38,13 @@ export function AppSidebar() {
     navigateToNewProject,
   } = useNavigation();
   const navigate = useNavigate();
-  const { refreshMembers } = useMember();
+
+  // Estado para controlar qué secciones están expandidas
+  const [myProjectsExpanded, setMyProjectsExpanded] = useState(true);
+  const [sharedProjectsExpanded, setSharedProjectsExpanded] = useState(true);
 
   const handleProjectClick = (projectId: string) => {
     navigateToProject(projectId);
-    // Añadir un pequeño timeout para asegurar que la navegación ha terminado
-    setTimeout(() => {
-      refreshMembers();
-    }, 100);
   };
 
   return (
@@ -81,55 +86,121 @@ export function AppSidebar() {
 
             <Separator className="my-2" />
 
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-semibold">Projects</h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={navigateToNewProject}
-              >
-                <Plus size={16} />
-              </Button>
-            </div>
-            <div className="space-y-1">
-              {projects.map((project) => (
-                <div
-                  key={project.id}
-                  className={cn("flex items-center group ")}
+            {/* Sección de Mis Proyectos */}
+            <div className="space-y-1 mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center text-sm font-semibold w-full justify-start p-2"
+                  onClick={() => setMyProjectsExpanded(!myProjectsExpanded)}
                 >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleProjectClick(project.id)}
-                    className={cn(
-                      "w-full justify-start",
-                      currentProjectId === project.id &&
-                        "bg-accent text-accent-foreground font-bold text-md"
-                    )}
-                  >
-                    <FileText size={16} className="mr-2 flex-shrink-0" />
-                    <span className="truncate">{project.name}</span>
-                  </Button>
-                </div>
-              ))}
-              {projects.length === 0 && (
-                <div className="px-2 py-4 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    No projects yet
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-2"
-                    onClick={navigateToNewProject}
-                  >
-                    <Plus size={16} className="mr-2" />
-                    Create Project
-                  </Button>
+                  {myProjectsExpanded ? (
+                    <ChevronDown size={16} className="mr-2" />
+                  ) : (
+                    <ChevronRight size={16} className="mr-2" />
+                  )}
+                  My Projects
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={navigateToNewProject}
+                >
+                  <Plus size={16} />
+                </Button>
+              </div>
+
+              {myProjectsExpanded && (
+                <div className="space-y-1 pl-2">
+                  {myProjects.map((project) => (
+                    <div
+                      key={project.id}
+                      className={cn("flex items-center group")}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleProjectClick(project.id)}
+                        className={cn(
+                          "w-full justify-start",
+                          currentProjectId === project.id &&
+                            "bg-accent text-accent-foreground font-bold text-md"
+                        )}
+                      >
+                        <FileText size={16} className="mr-2 flex-shrink-0" />
+                        <span className="truncate">{project.name}</span>
+                      </Button>
+                    </div>
+                  ))}
+                  {myProjects.length === 0 && (
+                    <div className="px-2 py-2 text-center">
+                      <p className="text-xs text-muted-foreground">
+                        No projects yet
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                        onClick={navigateToNewProject}
+                      >
+                        <Plus size={14} className="mr-2" />
+                        Create Project
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
+
+            {/* Sección de Proyectos Compartidos */}
+            {sharedProjects.length > 0 && (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between mb-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center text-sm font-semibold w-full justify-start p-2"
+                    onClick={() =>
+                      setSharedProjectsExpanded(!sharedProjectsExpanded)
+                    }
+                  >
+                    {sharedProjectsExpanded ? (
+                      <ChevronDown size={16} className="mr-2" />
+                    ) : (
+                      <ChevronRight size={16} className="mr-2" />
+                    )}
+                    Shared with me
+                  </Button>
+                </div>
+
+                {sharedProjectsExpanded && (
+                  <div className="space-y-1 pl-2">
+                    {sharedProjects.map((project) => (
+                      <div
+                        key={project.id}
+                        className={cn("flex items-center group")}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleProjectClick(project.id)}
+                          className={cn(
+                            "w-full justify-start",
+                            currentProjectId === project.id &&
+                              "bg-accent text-accent-foreground font-bold text-md"
+                          )}
+                        >
+                          <Users size={16} className="mr-2 flex-shrink-0" />
+                          <span className="truncate">{project.name}</span>
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </ScrollArea>
       </div>

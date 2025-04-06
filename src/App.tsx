@@ -14,6 +14,7 @@ import Project from "./pages/Project";
 import NewProject from "./pages/NewProject";
 import NotFound from "./pages/NotFound";
 import { NavigationProvider } from "./contexts/NavigationContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 
 const queryClient = new QueryClient();
 
@@ -21,48 +22,50 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
       <AuthProvider>
-        <NavigationProvider>
-          <ProjectProvider>
-            <MemberProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <Routes>
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/" element={<Index />} />
+        <NotificationProvider>
+          <NavigationProvider>
+            <ProjectProvider>
+              <MemberProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
+                  <Routes>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/" element={<Index />} />
 
-                  {/* Protected routes */}
-                  <Route
-                    path="/projects"
-                    element={
-                      <AppLayout>
-                        <Projects />
-                      </AppLayout>
-                    }
-                  />
-                  <Route
-                    path="/projects/new"
-                    element={
-                      <AppLayout>
-                        <NewProject />
-                      </AppLayout>
-                    }
-                  />
-                  <Route
-                    path="/projects/:projectId"
-                    element={
-                      <AppLayout>
-                        <Project />
-                      </AppLayout>
-                    }
-                  />
+                    {/* Protected routes */}
+                    <Route
+                      path="/projects"
+                      element={
+                        <AppLayout>
+                          <Projects />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/projects/new"
+                      element={
+                        <AppLayout>
+                          <NewProject />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/projects/:projectId"
+                      element={
+                        <AppLayout>
+                          <Project />
+                        </AppLayout>
+                      }
+                    />
 
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </TooltipProvider>
-            </MemberProvider>
-          </ProjectProvider>
-        </NavigationProvider>
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </TooltipProvider>
+              </MemberProvider>
+            </ProjectProvider>
+          </NavigationProvider>
+        </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>
   </QueryClientProvider>
