@@ -28,7 +28,7 @@ export function DocumentList({ onSelectDocumentForChat }: DocumentListProps) {
       return (
         <div className="text-center py-12">
           <FileQuestion className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium">No documents yet</h3>
+          <h3 className="text-lg font-medium ">No documents yet</h3>
           <p className="text-muted-foreground mt-1">
             Upload a document to get started
           </p>
@@ -37,7 +37,7 @@ export function DocumentList({ onSelectDocumentForChat }: DocumentListProps) {
     }
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
         {documents.map((document) => (
           <DocumentCard
             key={document.id}

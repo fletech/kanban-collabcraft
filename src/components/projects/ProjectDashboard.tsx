@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { MembersList } from "@/components/members/MembersList/MembersList";
 import { KanbanBoard } from "@/components/board/KanbanBoard";
 import { DocumentList } from "@/components/documents/DocumentList";
-import { DocumentChat } from "@/components/documents/DocumentChat";
+
 import { useToast } from "@/hooks/use-toast";
 import { PlusIcon } from "lucide-react";
 import { useProjects } from "@/contexts/ProjectContext";
@@ -16,6 +16,7 @@ import { useDocuments } from "@/contexts/DocumentContext";
 import { MemberInviteDialog } from "@/components/members/MemberInvite/MemberInviteDialog.tsx";
 import { Document } from "@/services/documentsService";
 import { NotesView } from "@/components/notes/NotesView";
+import { DocumentAnalysisView } from "@/components/documents/DocumentAnalysisView";
 
 // Recibir projectId como prop
 interface ProjectDashboardProps {
@@ -231,7 +232,7 @@ export function ProjectDashboard({ projectId }: ProjectDashboardProps) {
         </TabsContent>
         <TabsContent value="documents" className="mt-4">
           <div>
-            <h2 className="text-xl font-bold mb-4">Project Documents</h2>
+            <h2 className="text-xl font-bold mb-4 ">Project Documents</h2>
             <DocumentList
               onSelectDocumentForChat={handleSelectDocumentForChat}
             />
@@ -239,8 +240,8 @@ export function ProjectDashboard({ projectId }: ProjectDashboardProps) {
         </TabsContent>
         <TabsContent value="notes" className="mt-4">
           <div>
-            <h2 className="text-xl font-bold mb-4">Project Notes</h2>
-            <NotesView />
+            <h2 className="text-xl font-bold mb-4">AI Analysis</h2>
+            <DocumentAnalysisView />
           </div>
         </TabsContent>
         <TabsContent value="members" className="mt-4">

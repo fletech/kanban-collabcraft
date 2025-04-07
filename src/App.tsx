@@ -15,6 +15,7 @@ import Projects from "./pages/Projects";
 import Project from "./pages/Project";
 import NewProject from "./pages/NewProject";
 import NotFound from "./pages/NotFound";
+import AIAnalysis from "./pages/AIAnalysis";
 import { NavigationProvider } from "./contexts/NavigationContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 
@@ -59,6 +60,14 @@ const App = () => (
                           element={
                             <AppLayout>
                               <Project />
+                            </AppLayout>
+                          }
+                        />
+                        <Route
+                          path="/projects/:projectId/ai-analysis"
+                          element={
+                            <AppLayout>
+                              <AIAnalysis />
                             </AppLayout>
                           }
                         />
