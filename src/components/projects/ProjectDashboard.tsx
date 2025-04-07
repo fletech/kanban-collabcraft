@@ -6,11 +6,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MembersList } from "@/components/members/MembersList/MembersList";
 import { KanbanBoard } from "@/components/board/KanbanBoard";
+import { DocumentList } from "@/components/documents/DocumentList";
+import { DocumentChat } from "@/components/documents/DocumentChat";
 import { useToast } from "@/hooks/use-toast";
 import { PlusIcon } from "lucide-react";
 import { useProjects } from "@/contexts/ProjectContext";
 import { useMember } from "@/contexts/MemberContext";
+import { useDocuments } from "@/contexts/DocumentContext";
 import { MemberInviteDialog } from "@/components/members/MemberInvite/MemberInviteDialog.tsx";
+import { Document } from "@/services/documentsService";
+import { NotesView } from "@/components/notes/NotesView";
 
 // Recibir projectId como prop
 interface ProjectDashboardProps {
@@ -32,6 +37,9 @@ export function ProjectDashboard({ projectId }: ProjectDashboardProps) {
   // Usar el contexto de miembros
   const { members, isLoading: membersLoading } = useMember();
 
+  // Usar el contexto de documentos
+  const { setSelectedDocument } = useDocuments();
+
   // Estado local para detalles y progreso del proyecto
   const [projectName, setProjectName] = useState<string>("");
   const [progress, setProgress] = useState<number>(0);
@@ -40,6 +48,18 @@ export function ProjectDashboard({ projectId }: ProjectDashboardProps) {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
 
   const { toast } = useToast();
+
+  // Manejar selección de documento para chat
+  const handleSelectDocumentForChat = useCallback(
+    (document: Document) => {
+      setSelectedDocument(document);
+      toast({
+        title: "Document selected",
+        description: `Document "${document.name}" selected for AI analysis`,
+      });
+    },
+    [setSelectedDocument, toast]
+  );
 
   // Función para cargar detalles del proyecto
   const fetchProjectDetails = useCallback(
@@ -199,8 +219,8 @@ export function ProjectDashboard({ projectId }: ProjectDashboardProps) {
         <TabsList>
           <TabsTrigger value="description">Description</TabsTrigger>
           <TabsTrigger value="board">Board</TabsTrigger>
-          <TabsTrigger value="notes">Notes</TabsTrigger>
-          <TabsTrigger value="test">Test</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="notes">AI Analysis</TabsTrigger>
           <TabsTrigger value="members">Members</TabsTrigger>
         </TabsList>
         <TabsContent value="description" className="mt-4">
@@ -209,18 +229,22 @@ export function ProjectDashboard({ projectId }: ProjectDashboardProps) {
         <TabsContent value="board" className="mt-4">
           <KanbanBoard projectId={projectId} onProgressUpdate={setProgress} />
         </TabsContent>
-        <TabsContent value="members" className="mt-4">
-          <MembersList />
+        <TabsContent value="documents" className="mt-4">
+          <div>
+            <h2 className="text-xl font-bold mb-4">Project Documents</h2>
+            <DocumentList
+              onSelectDocumentForChat={handleSelectDocumentForChat}
+            />
+          </div>
         </TabsContent>
         <TabsContent value="notes" className="mt-4">
-          <div className="text-muted-foreground">
-            Project notes will appear here.
+          <div>
+            <h2 className="text-xl font-bold mb-4">Project Notes</h2>
+            <NotesView />
           </div>
         </TabsContent>
-        <TabsContent value="test" className="mt-4">
-          <div className="text-muted-foreground">
-            Test information will appear here.
-          </div>
+        <TabsContent value="members" className="mt-4">
+          <MembersList />
         </TabsContent>
       </Tabs>
       <MemberInviteDialog

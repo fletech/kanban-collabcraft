@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProjectProvider } from "@/contexts/ProjectContext";
 import { MemberProvider } from "@/contexts/MemberContext";
+import { DocumentProvider } from "@/contexts/DocumentContext";
+import { AnalysisProvider } from "@/contexts/AnalysisContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -26,42 +28,46 @@ const App = () => (
           <NavigationProvider>
             <ProjectProvider>
               <MemberProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Sonner />
-                  <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/" element={<Index />} />
+                <DocumentProvider>
+                  <AnalysisProvider>
+                    <TooltipProvider>
+                      <Toaster />
+                      <Sonner />
+                      <Routes>
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/" element={<Index />} />
 
-                    {/* Protected routes */}
-                    <Route
-                      path="/projects"
-                      element={
-                        <AppLayout>
-                          <Projects />
-                        </AppLayout>
-                      }
-                    />
-                    <Route
-                      path="/projects/new"
-                      element={
-                        <AppLayout>
-                          <NewProject />
-                        </AppLayout>
-                      }
-                    />
-                    <Route
-                      path="/projects/:projectId"
-                      element={
-                        <AppLayout>
-                          <Project />
-                        </AppLayout>
-                      }
-                    />
+                        {/* Protected routes */}
+                        <Route
+                          path="/projects"
+                          element={
+                            <AppLayout>
+                              <Projects />
+                            </AppLayout>
+                          }
+                        />
+                        <Route
+                          path="/projects/new"
+                          element={
+                            <AppLayout>
+                              <NewProject />
+                            </AppLayout>
+                          }
+                        />
+                        <Route
+                          path="/projects/:projectId"
+                          element={
+                            <AppLayout>
+                              <Project />
+                            </AppLayout>
+                          }
+                        />
 
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </TooltipProvider>
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </TooltipProvider>
+                  </AnalysisProvider>
+                </DocumentProvider>
               </MemberProvider>
             </ProjectProvider>
           </NavigationProvider>
