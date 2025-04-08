@@ -9,6 +9,8 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -22,7 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Configurar el listener de cambios de sesión
+    // Set up session change listener
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -51,15 +53,75 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         toast({
-          title: "Authentication failed",
+          title: "Authentication Failed",
           description: error.message,
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "An error occurred",
-        description: "Unable to sign in with Google",
+        title: "Error",
+        description: "Unable to sign in with Google. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const signInWithEmail = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        toast({
+          title: "Authentication Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        navigate("/projects");
+        toast({
+          title: "Welcome Back!",
+          description: "You have successfully signed in to your account.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Unable to sign in with email. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const signUpWithEmail = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/projects`,
+        },
+      });
+
+      if (error) {
+        toast({
+          title: "Registration Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Registration Successful",
+          description: "Please check your email to verify your account.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Unable to create account. Please try again.",
         variant: "destructive",
       });
     }
@@ -70,12 +132,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await supabase.auth.signOut();
       navigate("/");
       toast({
-        title: "Signed out successfully",
+        title: "Signed Out Successfully",
+        description: "You have been securely logged out.",
       });
     } catch (error) {
       toast({
-        title: "An error occurred",
-        description: "Unable to sign out",
+        title: "Error",
+        description: "Unable to sign out. Please try again.",
         variant: "destructive",
       });
     }
@@ -83,7 +146,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, signInWithGoogle, signOut }}
+      value={{
+        user,
+        session,
+        loading,
+        signInWithGoogle,
+        signInWithEmail,
+        signUpWithEmail,
+        signOut,
+      }}
     >
       {children}
     </AuthContext.Provider>

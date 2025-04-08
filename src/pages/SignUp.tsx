@@ -4,7 +4,7 @@ import { AuthForm } from "@/components/auth/AuthForm";
 import { useNavigate } from "react-router-dom";
 import { LayoutDashboard } from "lucide-react";
 
-export default function Login() {
+export default function SignUp() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -24,7 +24,7 @@ export default function Login() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <AuthForm mode="signin" />
+        <AuthForm mode="signup" />
       </div>
     </div>
   );

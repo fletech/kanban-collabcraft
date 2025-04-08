@@ -11,6 +11,7 @@ import { AnalysisProvider } from "@/contexts/AnalysisContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
 import Projects from "./pages/Projects";
 import Project from "./pages/Project";
 import NewProject from "./pages/NewProject";
@@ -35,9 +36,12 @@ const App = () => (
                       <Toaster />
                       <Sonner />
                       <Routes>
-                        <Route path="/login" element={<Login />} />
+                        {/* Public routes */}
                         <Route path="/" element={<Index />} />
-
+                        <Route path="/signin" element={<Login />} />
+                        <Route path="/signup" element={<SignUp />} />
+                        <Route path="/login" element={<Login />} />{" "}
+                        {/* Keeping for backwards compatibility */}
                         {/* Protected routes */}
                         <Route
                           path="/projects"
@@ -71,7 +75,6 @@ const App = () => (
                             </AppLayout>
                           }
                         />
-
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </TooltipProvider>

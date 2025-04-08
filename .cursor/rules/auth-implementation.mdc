@@ -1,0 +1,39 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+## 1. UI Preparation
+- Create new AuthForm component to handle both registration and login
+- Design a form with fields for:
+- Email
+- Password
+- Password confirmation (signup only)
+- Toggle between "Sign In" and "Sign Up" modes
+## 2. Auth Context Modification
+- Add new functions to AuthContext:
+- signUpWithEmail: for email/password registration
+- signInWithEmail: for email/password login
+- Keep existing signOut
+- Remove signInWithGoogle (or keep as secondary option)
+## 3. Security Validations
+- Implement validations for:
+- Email format
+- Password strength
+- Password match in registration
+- Supabase specific error handling
+## 4. User Flow
+- Redirect after successful registration to projects page
+- Email verification handling (optional)
+- User feedback using existing toast system
+## 5.Route Updates
+- Modify landing page to show new auth form
+- Configure route protection based on authentication state
+## 6. Database Integration
+- Ensure Supabase users table has necessary fields
+- Configure security policies in Supabase for new auth methods
+## 7. UX Improvements
+- Add loading states
+- Implement transition animations
+- Improve error messages
+- Ensure responsive design
