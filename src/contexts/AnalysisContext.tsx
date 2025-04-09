@@ -1,7 +1,14 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 import { aiService } from "@/services/aiService";
 import { useToast } from "@/hooks/use-toast";
 import { useDocuments } from "@/contexts/DocumentContext";
+import { supabase } from "@/lib/supabase";
 
 interface Analysis {
   summary: string;
@@ -24,6 +31,7 @@ interface AnalysisContextType {
   selectedTask: any | null;
   chatMessages: ChatMessage[];
   chatLoading: boolean;
+  analysisStatus: string | null;
   setSelectedTask: (task: any) => void;
   setAnalysis: (analysis: Analysis | null) => void;
   analyzeDocument: (document: any, projectId: string) => Promise<void>;
@@ -42,8 +50,14 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatLoading, setChatLoading] = useState(false);
+  const [analysisStatus, setAnalysisStatus] = useState<string | null>(null);
   const { toast } = useToast();
   const { selectedDocument } = useDocuments();
+
+  // Limpiar análisis cuando cambia el documento seleccionado
+  useEffect(() => {
+    clearAnalysis();
+  }, [selectedDocument?.id]);
 
   const analyzeDocument = useCallback(
     async (document: any, projectId: string) => {
@@ -51,7 +65,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         toast({
           title: "Error",
           description:
-            "No se pudo analizar el documento. Selecciona un proyecto y un documento.",
+            "Cannot analyze document. Select a project and document.",
           variant: "destructive",
         });
         return;
@@ -59,24 +73,50 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
 
       try {
         setAnalyzing(true);
+
+        // Suscribirse a cambios en el estado del análisis
+        const subscription = supabase
+          .channel("document_analysis_changes")
+          .on(
+            "postgres_changes",
+            {
+              event: "UPDATE",
+              schema: "public",
+              table: "document_analysis",
+              filter: `document_id=eq.${document.id}`,
+            },
+            (payload) => {
+              setAnalysisStatus(payload.new.analysis_status);
+            }
+          )
+          .subscribe();
+
         const result = await aiService.analyzeDocument(document, projectId);
         setAnalysis(result);
 
         toast({
-          title: "Análisis completado",
-          description:
-            "Se han generado sugerencias de tareas a partir del documento.",
+          title: result.fromCache
+            ? "Cached Analysis Loaded"
+            : "Analysis completed",
+          description: result.fromCache
+            ? "Showing previously generated analysis for this document"
+            : "Task suggestions have been generated from the document.",
+          variant: "default",
         });
+
+        // Limpiar suscripción
+        subscription.unsubscribe();
       } catch (error: any) {
         console.error("Error analyzing document:", error);
         toast({
           title: "Error",
-          description: error.message || "Error al analizar el documento",
+          description: error.message || "Error analyzing document",
           variant: "destructive",
         });
         setAnalysis(null);
       } finally {
         setAnalyzing(false);
+        setAnalysisStatus(null);
       }
     },
     [toast]
@@ -150,6 +190,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         selectedTask,
         chatMessages,
         chatLoading,
+        analysisStatus,
         setSelectedTask,
         setAnalysis,
         analyzeDocument,

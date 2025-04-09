@@ -119,6 +119,7 @@ const AnalysisArea = () => {
     chatMessages,
     sendChatMessage,
     analyzeDocument,
+    analysisStatus,
   } = useAnalysis();
   const [activeTab, setActiveTab] = useState<"analysis" | "chat">("analysis");
 
@@ -194,6 +195,7 @@ const AnalysisArea = () => {
               <AnalysisContent
                 analysis={analysis}
                 documentId={selectedDocument.id}
+                status={analysisStatus}
               />
             ) : (
               <ChatContent

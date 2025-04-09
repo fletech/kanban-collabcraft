@@ -130,6 +130,7 @@ export interface Database {
           ai_provider: string;
           analysis_summary: string | null;
           raw_ai_response: string | null;
+          extracted_text: string | null;
         };
         Insert: {
           id?: string;
@@ -139,6 +140,7 @@ export interface Database {
           ai_provider: string;
           analysis_summary?: string | null;
           raw_ai_response?: string | null;
+          extracted_text?: string | null;
         };
         Update: {
           id?: string;
@@ -148,6 +150,7 @@ export interface Database {
           ai_provider?: string;
           analysis_summary?: string | null;
           raw_ai_response?: string | null;
+          extracted_text?: string | null;
         };
       };
       task_sources: {

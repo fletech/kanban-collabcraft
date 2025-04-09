@@ -1,7 +1,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, AlertCircle } from "lucide-react";
+import { Plus, AlertCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useProjectId } from "@/hooks/use-projectId";
@@ -11,11 +11,13 @@ import { aiService } from "@/services/aiService";
 interface AnalysisContentProps {
   analysis: any;
   documentId: string;
+  status?: string;
 }
 
 export const AnalysisContent = ({
   analysis,
   documentId,
+  status,
 }: AnalysisContentProps) => {
   const { toast } = useToast();
   const projectId = useProjectId();
@@ -25,7 +27,7 @@ export const AnalysisContent = ({
     if (!documentId || !projectId || !user) {
       toast({
         title: "Error",
-        description: "No se puede crear la tarea. Información incompleta.",
+        description: "Cannot create task. Missing information.",
         variant: "destructive",
       });
       return;
@@ -40,14 +42,14 @@ export const AnalysisContent = ({
       );
 
       toast({
-        title: "Tarea creada",
-        description: `Se ha creado la tarea: ${task.title}`,
+        title: "Task created",
+        description: `Task created: ${task.title}`,
       });
     } catch (error: any) {
       console.error("Error creating task:", error);
       toast({
         title: "Error",
-        description: error.message || "Error al crear la tarea",
+        description: error.message || "Error creating task",
         variant: "destructive",
       });
     }
@@ -62,18 +64,52 @@ export const AnalysisContent = ({
       }
 
       toast({
-        title: "Tareas creadas",
-        description: "Se han creado todas las tareas sugeridas",
+        title: "Tasks created",
+        description: "All suggested tasks have been created",
       });
     } catch (error) {
       console.error("Error creating all tasks:", error);
       toast({
         title: "Error",
-        description: "Hubo un error al crear algunas tareas",
+        description: "There was an error creating some tasks",
         variant: "destructive",
       });
     }
   };
+
+  // Mostrar estado de procesamiento
+  if (status && status !== "completed" && status !== "error") {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-gray-500 gap-3">
+        <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+        </div>
+        <p className="text-sm font-medium text-blue-700">
+          {status === "downloading" && "Downloading document..."}
+          {status === "extracting_text" && "Extracting text from document..."}
+          {status === "analyzing" && "Analyzing document with AI..."}
+          {status === "processing" && "Processing document..."}
+        </p>
+      </div>
+    );
+  }
+
+  // Mostrar error
+  if (status === "error") {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-gray-500 gap-3">
+        <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
+          <AlertCircle className="w-6 h-6 text-red-500" />
+        </div>
+        <p className="text-sm font-medium text-red-700">
+          Error analyzing document
+        </p>
+        <p className="text-xs text-red-500">
+          {analysis?.summary || "Please try again"}
+        </p>
+      </div>
+    );
+  }
 
   if (!analysis) {
     return (

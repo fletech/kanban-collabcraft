@@ -1,0 +1,65 @@
+AI Code Product Hunt
+Documentación Completa
+Índice
+
+1. Requisitos del Proyecto (PRD)
+2. Flujo de la Aplicación
+3. Stack Tecnológico
+4. Guía Frontend
+5. Estructura Backend
+6. Reglas de Cursor
+7. Mejores Prácticas
+   A- Requisitos del Proyecto (PRD)
+8. Descripción General
+   AI Code Product Hunt es un marketplace web donde desarrolladores no-code e indie hackers pueden listar sus startups para
+   venta. La plataforma facilita a los vendedores publicar listados detallados sobre sus startups—incluyendo detalles esenciales
+   como nombre, sitio web, industria, ingresos, base de usuarios e imágenes—mientras permite a los compradores explorar listados
+   usando filtros de búsqueda robustos.
+   Compradores y vendedores pueden conectarse instantáneamente mediante una función de chat en tiempo real, facilitando
+   conversaciones directas y negociaciones sobre posibles transacciones. La integración de autenticación de Google a través de
+   Clerk asegura un proceso de inicio de sesión seguro y simplificado para ambas partes.
+   Este proyecto se está construyendo para empoderar a los desarrolladores no-code proporcionándoles un espacio dedicado para
+   valorar, mostrar y monetizar sus startups, mientras ofrece a los compradores un marketplace curado donde pueden encontrar
+   oportunidades prometedoras.
+   Los objetivos clave incluyen ofrecer una interfaz de usuario intuitiva, asegurar un rendimiento rápido y confiable, mantener
+   estándares de seguridad sólidos, y ofrecer análisis detallados para ayudar a los vendedores a refinar continuamente sus listados.
+   El éxito de la plataforma se medirá por el engagement de usuarios, el número de intercambios exitosos iniciados a través del
+   sistema de chat, y la satisfacción general del usuario con el diseño limpio y minimalista.
+9. Alcance vs. Fuera de Alcance
+   En Alcance:
+   Implementación de autenticación de usuario y onboarding usando Google auth vía Clerk.
+   Dashboard de vendedor con un formulario para listar startups con información detallada (nombre de startup, sitio web,
+   edad, industria, ingresos, base de usuarios, descripción, razón de venta e imágenes).
+   Funcionalidad de chat en tiempo real para permitir a compradores enviar mensajes de intención e iniciar conversaciones
+   con vendedores.
+   Dashboard de estilo grid visualmente atractivo y responsivo para mostrar los listados de startups, junto con filtros (industria,
+   precio de venta, MRR, etc.).
+   Navegación por barra lateral para fácil acceso a todas las secciones de la app.
+   Integración de analíticas y reportes de vendedor para rastrear vistas de listado, consultas y métricas de engagement.
+   Dashboard administrativo para moderar listados e interacciones de chat.
+   Funcionalidad de carga de imágenes con soporte para formatos JPEG, PNG y GIF, con guías de tamaño y dimensiones de
+   archivo.
+   Optimización móvil con diseño responsivo asegurando usabilidad en smartphones y tablets.
+   Fuera de Alcance:
+   Procesamiento de pago directo en la plataforma; las transacciones serán manejadas externamente entre compradores y
+   vendedores.
+   Filtros avanzados o adicionales más allá de industria, precio de venta y MRR se considerarán en fases posteriores.
+   Características administrativas excesivamente complejas más allá de moderación básica, aprobación y marcado de
+   contenido.
+   Elementos de marca extensivos más allá de un logo simple y diseño limpio y minimalista.
+   Características de personalización de usuario completas (aparte de configuraciones básicas de privacidad en el chat) no
+   serán parte del lanzamiento inicial.
+10. Flujo de Usuario
+    Un nuevo usuario—ya sea comprador o vendedor—comienza iniciando sesión usando autenticación de Google proporcionada por
+    Clerk. Después de un registro seguro y rápido, el usuario es recibido con un proceso de onboarding que destaca las principales
+    características de la plataforma.
+    Para vendedores, el viaje continúa accediendo a un dashboard dedicado donde pueden fácilmente completar un formulario
+    comprensivo para listar su startup. Para compradores, el dashboard muestra una grid visualmente rica de listados de startups con
+    filtros claros como industria, precio de venta e ingreso mensual recurrente (MRR).
+    Una vez en la plataforma, los vendedores pueden monitorear sus listados y acceder a opciones para editarlos o eliminarlos
+    usando botones simples, con un formulario pre-poblado facilitando el proceso de actualización. Los compradores interesados en
+    un listado pueden iniciar rápidamente un chat en tiempo real enviando un mensaje de intención. Al ser aceptado por el vendedor,
+    comienza una conversación directa, permitiendo a ambas partes negociar más. Además, existe un dashboard administrativo en
+    segundo plano para moderar contenido y asegurar un entorno seguro, mientras que los usuarios móviles reciben una experiencia
+    igualmente responsiva y fluida.
+
