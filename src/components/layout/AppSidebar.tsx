@@ -40,7 +40,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
 
   // Estado para controlar qué secciones están expandidas
-  const [myProjectsExpanded, setMyProjectsExpanded] = useState(false);
+  const [myProjectsExpanded, setMyProjectsExpanded] = useState(true);
   const [sharedProjectsExpanded, setSharedProjectsExpanded] = useState(false);
 
   const handleProjectClick = (projectId: string) => {

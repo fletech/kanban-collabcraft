@@ -5,16 +5,20 @@ import { useMember } from "@/contexts/MemberContext";
 import { membersService } from "@/services/membersService";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import NewProject from "./NewProject";
 
 export default function Project() {
-  // 1. Extraer ID explícitamente de la URL
   const { projectId } = useParams<{ projectId: string }>();
   const [isLoading, setIsLoading] = useState(true);
   const [membersLoaded, setMembersLoaded] = useState(false);
   const { toast } = useToast();
   const { setMembers } = useMember();
 
-  // 2. Precargar datos esenciales
+  // Si estamos en la ruta 'new', renderizar directamente el componente NewProject
+  if (projectId === "new") {
+    return <NewProject />;
+  }
+
   useEffect(() => {
     async function loadProjectData() {
       if (!projectId) return;
@@ -22,8 +26,6 @@ export default function Project() {
       setIsLoading(true);
 
       try {
-        // Cargar miembros directamente aquí
-        console.log(`Project: Loading members for project ${projectId}`);
         const membersData = await membersService.fetchProjectMembers(projectId);
         setMembers(membersData);
         setMembersLoaded(true);
@@ -53,19 +55,8 @@ export default function Project() {
   }
 
   if (isLoading) {
-    return (
-      <div className="p-6">
-        <Skeleton className="h-12 w-48 mb-4" />
-        <Skeleton className="h-4 w-64 mb-6" />
-        <div className="grid grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-40 w-full" />
-          ))}
-        </div>
-      </div>
-    );
+    return <Skeleton className="w-full h-[200px]" />;
   }
 
-  // 3. Pasar projectId explícitamente
   return <ProjectDashboard projectId={projectId} />;
 }

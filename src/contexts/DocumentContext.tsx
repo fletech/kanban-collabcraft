@@ -45,6 +45,12 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
   // Cargar documentos de un proyecto específico
   const fetchProjectDocuments = useCallback(
     async (projectId: string) => {
+      // No intentar cargar documentos si estamos en la ruta new
+      if (projectId === "new") {
+        setDocuments([]);
+        return;
+      }
+
       try {
         setIsLoading(true);
         console.log(

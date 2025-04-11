@@ -48,6 +48,12 @@ export function MemberProvider({ children }: { children: React.ReactNode }) {
   // Simplificada para recibir projectId explícitamente
   const fetchProjectMembers = useCallback(
     async (projectId: string) => {
+      // No intentar cargar miembros si estamos en la ruta new
+      if (projectId === "new") {
+        setMembers([]);
+        return;
+      }
+
       try {
         setIsLoading(true);
         console.log(

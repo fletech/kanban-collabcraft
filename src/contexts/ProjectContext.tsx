@@ -157,7 +157,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
 
   // Carga de progreso de proyecto
   useEffect(() => {
-    if (!currentProjectId) return;
+    if (!currentProjectId || currentProjectId === "new") return;
 
     // Función para cargar progreso
     const fetchProjectProgress = async (id: string) => {
