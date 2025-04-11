@@ -19,6 +19,54 @@ initPdfWorker().catch(console.error);
  */
 export const aiService = {
   /**
+   * Divide el texto en partes analizables
+   */
+  splitTextIntoChunks(text: string, chunkSize: number = 12000): string[] {
+    const chunks: string[] = [];
+    let currentIndex = 0;
+
+    while (currentIndex < text.length) {
+      // Buscar el último punto o salto de línea antes del límite
+      let endIndex = Math.min(currentIndex + chunkSize, text.length);
+      if (endIndex < text.length) {
+        const lastPeriod = text.lastIndexOf(".", endIndex);
+        const lastNewline = text.lastIndexOf("\n", endIndex);
+        endIndex = Math.max(lastPeriod, lastNewline);
+        if (endIndex <= currentIndex) {
+          endIndex = Math.min(currentIndex + chunkSize, text.length);
+        }
+      }
+
+      chunks.push(text.slice(currentIndex, endIndex));
+      currentIndex = endIndex + 1;
+    }
+
+    return chunks;
+  },
+
+  /**
+   * Combina los resultados de múltiples análisis
+   */
+  combineAnalysisResults(results: any[]): any {
+    const combinedTasks: any[] = [];
+    const summaries: string[] = [];
+
+    results.forEach((result, index) => {
+      if (result.tasks) {
+        combinedTasks.push(...result.tasks);
+      }
+      if (result.summary) {
+        summaries.push(`Part ${index + 1}: ${result.summary}`);
+      }
+    });
+
+    return {
+      summary: summaries.join("\n\n"),
+      tasks: combinedTasks,
+    };
+  },
+
+  /**
    * Analiza un documento y sugiere tareas
    */
   async analyzeDocument(document: Document, projectId: string): Promise<any> {
@@ -102,21 +150,29 @@ export const aiService = {
 
       await this.updateAnalysisStatus(analysis.id, "analyzing");
 
-      // Preparar texto para análisis (limitar a 30k caracteres)
-      const truncatedText = text.slice(0, 30000);
+      // Dividir el texto en partes analizables
+      const textChunks = this.splitTextIntoChunks(text);
+      const analysisResults = [];
 
-      // Analizar con Groq
-      let aiResponse;
-      try {
-        aiResponse = await this.analyzeWithGroq(truncatedText);
-      } catch (error) {
+      // Analizar cada parte
+      for (let i = 0; i < textChunks.length; i++) {
         await this.updateAnalysisStatus(
           analysis.id,
-          "error",
-          "Error analyzing with AI"
+          `analyzing_part_${i + 1}_of_${textChunks.length}`
         );
-        throw error;
+
+        try {
+          const partialResult = await this.analyzeWithGroq(textChunks[i]);
+          analysisResults.push(partialResult);
+        } catch (error) {
+          console.error(`Error analyzing part ${i + 1}:`, error);
+          // Continuar con la siguiente parte si hay un error
+          continue;
+        }
       }
+
+      // Combinar resultados
+      const aiResponse = this.combineAnalysisResults(analysisResults);
 
       // Guardar resultados
       const { data: updatedAnalysis, error: updateError } = await supabase
@@ -133,7 +189,7 @@ export const aiService = {
         await this.updateAnalysisStatus(
           analysis.id,
           "error",
-          "Error saving analysis results"
+          "analysis results"
         );
         throw updateError;
       }
@@ -454,6 +510,11 @@ Always respond in English.`,
     );
 
     if (!response.ok) {
+      if (response.status === 413) {
+        throw new Error(
+          "Document is too large for analysis. Try with a smaller document or reduce the content."
+        );
+      }
       throw new Error(
         `Groq API error: ${response.status} ${response.statusText}`
       );
