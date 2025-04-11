@@ -187,7 +187,7 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
           </Button>
         </form>
 
-        <div className="text-center">
+        <div className="text-center space-y-2">
           <Link
             to={isSignUp ? "/signin" : "/signup"}
             className="text-sm text-blue-600 hover:text-blue-700 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -196,6 +196,17 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
               ? "Already have an account? Sign in"
               : "Don't have an account? Sign up"}
           </Link>
+
+          {!isSignUp && (
+            <div>
+              <Link
+                to="/forgot-password"
+                className="text-sm text-blue-600 hover:text-blue-700 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Forgot your password?
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

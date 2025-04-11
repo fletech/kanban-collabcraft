@@ -12,6 +12,8 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Projects from "./pages/Projects";
 import Project from "./pages/Project";
 import NewProject from "./pages/NewProject";
@@ -19,6 +21,7 @@ import NotFound from "./pages/NotFound";
 import AIAnalysis from "./pages/AIAnalysis";
 import { NavigationProvider } from "./contexts/NavigationContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
+import EmailVerification from "./pages/EmailVerification";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +43,18 @@ const App = () => (
                         <Route path="/" element={<Index />} />
                         <Route path="/signin" element={<Login />} />
                         <Route path="/signup" element={<SignUp />} />
+                        <Route
+                          path="/forgot-password"
+                          element={<ForgotPassword />}
+                        />
+                        <Route
+                          path="/reset-password"
+                          element={<ResetPassword />}
+                        />
+                        <Route
+                          path="/verify-email"
+                          element={<EmailVerification />}
+                        />
                         <Route path="/login" element={<Login />} />{" "}
                         {/* Keeping for backwards compatibility */}
                         {/* Protected routes */}
